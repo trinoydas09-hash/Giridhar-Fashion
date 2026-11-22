@@ -153,6 +153,9 @@ export function AdminDashboardClient() {
           flashNotice('err', data.error || 'Failed to load admin snapshot.');
           return;
         }
+        lastPendingOrderCount.current = (data.orders || []).filter(
+          (order: { status: string }) => order.status === 'pending_whatsapp'
+        ).length;
         setSnapshot(data);
         setSectionsDraft(data.sections || []);
         setSettingsDraft(data.settings || null);
