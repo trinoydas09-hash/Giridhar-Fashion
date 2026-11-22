@@ -4,7 +4,7 @@ import path from 'node:path';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminRequest } from '@/lib/security/auth';
 import { hasSupabaseServiceRole } from '@/lib/supabase/config';
-import { createSupabaseAdminClient } from '@/lib/supabase/server';
+import { createSupabaseAdminClient, createSupabaseUserClient } from '@/lib/supabase/server';
 
 const ALLOWED_MIME: Record<string, string> = {
   'image/jpeg': 'jpg',
@@ -46,8 +46,11 @@ export async function POST(req: NextRequest) {
     const bytes = Buffer.from(await file.arrayBuffer());
     const fileName = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}.${ext}`;
 
-    if (hasSupabaseServiceRole()) {
-      const adminClient = createSupabaseAdminClient();
+    const bearer = req.headers.get('authorization')?.replace(/^Bearer\\s+/i, '').trim();
+    const userClient = bearer ? createSupabaseUserClient(bearer) : null;
+
+    if (userClient || hasSupabaseServiceRole()) {
+      const adminClient = userClient ?? createSupabaseAdminClient();
       if (!adminClient) {
         return NextResponse.json({ error: 'Supabase Storage client unavailable.' }, { status: 500 });
       }
