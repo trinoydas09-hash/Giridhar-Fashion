@@ -3,7 +3,9 @@ import { CartProvider } from '@/components/providers/CartProvider';
 import { GiridharAiWidget } from '@/components/storefront/GiridharAiWidget';
 import './globals.css';
 
-const appUrl = process.env.APP_URL?.startsWith('http') ? process.env.APP_URL : 'https://giridharfashion.com';
+const appUrl = process.env.APP_URL?.startsWith('http')
+  ? process.env.APP_URL
+  : 'https://giridhar-fashion.vercel.app';
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
@@ -12,11 +14,11 @@ export const metadata: Metadata = {
     template: '%s | GIRIDHAR FASHION',
   },
   description:
-    'Modern, minimal, distinct luxury menswear crafted in Bangladesh. Shop tailored shirts, heavyweight hoodies, cable knit sweaters, and trousers.',
+    'Modern, minimal, distinct menswear crafted in Bangladesh. Explore the GIRIDHAR FASHION collection.',
   openGraph: {
     title: 'GIRIDHAR FASHION — Modern Minimal Luxury Menswear',
     description:
-      'Modern, minimal, distinct luxury menswear crafted in Bangladesh. Shop tailored shirts, heavyweight hoodies, cable knit sweaters, and trousers.',
+      'Modern, minimal, distinct menswear crafted in Bangladesh.',
     type: 'website',
     siteName: 'GIRIDHAR FASHION',
     images: ['/assets/aistudio/image_32af7105.png'],
@@ -24,8 +26,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'GIRIDHAR FASHION — Modern Minimal Luxury Menswear',
-    description:
-      'Modern, minimal, distinct luxury menswear crafted in Bangladesh.',
+    description: 'Modern, minimal, distinct menswear crafted in Bangladesh.',
   },
 };
 
@@ -36,14 +37,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     name: 'GIRIDHAR FASHION',
     description: 'Modern Minimal Luxury Menswear in Bangladesh.',
     url: appUrl,
-    priceRange: '৳1,190 - ৳3,500',
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: 'House 24, Road 11, Banani',
-      addressLocality: 'Dhaka',
-      postalCode: '1213',
-      addressCountry: 'BD',
-    },
   };
 
   return (
