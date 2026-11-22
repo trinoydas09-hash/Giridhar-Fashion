@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+/*
+ * Explicit source registration makes Tailwind v4 scan the actual application
+ * source tree in CI and hosted build environments, regardless of the working
+ * directory or automatic source-detection heuristics.
+ */
+@source "../app";
+@source "../components";
+@source "../hooks";
+@source "../lib";
+@source "../types";
+
 @theme inline {
   --font-serif: var(--font-cormorant), Georgia, serif;
   --font-sans: var(--font-jakarta), system-ui, -apple-system, sans-serif;
@@ -19,6 +30,7 @@
   }
 
   body {
+    min-height: 100%;
     background-color: #FAF9F6;
     color: #242424;
     font-family: var(--font-jakarta), system-ui, -apple-system, sans-serif;
