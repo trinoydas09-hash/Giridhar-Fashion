@@ -3,7 +3,6 @@ import { CartProvider } from '@/components/providers/CartProvider';
 import { GiridharAiWidget } from '@/components/storefront/GiridharAiWidget';
 import './globals.css';
 
-
 const appUrl = process.env.APP_URL?.startsWith('http') ? process.env.APP_URL : 'https://giridharfashion.com';
 
 export const metadata: Metadata = {
@@ -48,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <html lang="en" >
+    <html lang="en">
       <body suppressHydrationWarning className="min-h-screen bg-[#FAF9F6] text-[#242424] antialiased">
         <script
           type="application/ld+json"
