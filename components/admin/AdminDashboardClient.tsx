@@ -1301,7 +1301,7 @@ export function AdminDashboardClient() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-[#E4DDD0] pt-5">
                   <div>
-                    <label className="block text-xs font-semibold uppercase mb-1">Dhaka Delivery (৳)</label>
+                    <label className="block text-xs font-semibold uppercase mb-1">Chattogram Delivery (৳)</label>
                     <input
                       type="number"
                       value={settingsDraft.delivery_charge_dhaka}
@@ -1312,7 +1312,7 @@ export function AdminDashboardClient() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold uppercase mb-1">Outside Dhaka (৳)</label>
+                    <label className="block text-xs font-semibold uppercase mb-1">Outside Chattogram (৳)</label>
                     <input
                       type="number"
                       value={settingsDraft.delivery_charge_outside}
@@ -1323,7 +1323,7 @@ export function AdminDashboardClient() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold uppercase mb-1">Free Delivery Threshold (৳)</label>
+                    <label className="block text-xs font-semibold uppercase mb-1">Free Delivery Minimum Items</label>
                     <input
                       type="number"
                       value={settingsDraft.free_delivery_threshold}
