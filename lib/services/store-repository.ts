@@ -205,10 +205,13 @@ function recordActivity(snapshot: StoreSnapshot, action: string, entity_type: st
   snapshot.activity = [entry, ...snapshot.activity].slice(0, 30);
 }
 
-async function loadSupabaseSnapshot(includeDrafts: boolean): Promise<StoreSnapshot> {
-  const client = includeDrafts
+async function loadSupabaseSnapshot(
+  includeDrafts: boolean,
+  clientOverride?: NonNullable<ReturnType<typeof createSupabaseAdminClient>>
+): Promise<StoreSnapshot> {
+  const client = clientOverride ?? (includeDrafts
     ? createSupabaseAdminClient() ?? (await createSupabaseServerClient())
-    : await createSupabaseServerClient();
+    : await createSupabaseServerClient());
 
   if (!client) {
     return loadLocalStore();
@@ -492,12 +495,14 @@ export async function getPublicProductBySlug(slug: string): Promise<{
   };
 }
 
-export async function getAdminStoreSnapshot(): Promise<StoreSnapshot> {
+export async function getAdminStoreSnapshot(
+  clientOverride?: NonNullable<ReturnType<typeof createSupabaseAdminClient>>
+): Promise<StoreSnapshot> {
   const aiProviders = await getPublicProviderConfigs();
   const aiSettings = await getAIAssistantSettings();
 
   if (isSupabaseConfigured()) {
-    const snap = await loadSupabaseSnapshot(true);
+    const snap = await loadSupabaseSnapshot(true, clientOverride);
     return {
       ...snap,
       ai_settings: snap.ai_settings || aiSettings,
