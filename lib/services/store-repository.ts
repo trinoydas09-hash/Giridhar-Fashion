@@ -989,6 +989,7 @@ function buildJoinedMembershipViews(
 export async function listMembershipRequestViews(): Promise<MembershipRequestView[]> {
   if (isSupabaseConfigured()) {
     const admin = createSupabaseAdminClient();
+    if (!admin) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for membership administration.');
     if (admin) {
       try {
         const [{ data: reqRows }, { data: recRows }, { data: codeRows }] = await Promise.all([
@@ -1040,6 +1041,7 @@ export async function createMembershipRequest(input: {
 
   if (isSupabaseConfigured()) {
     const admin = createSupabaseAdminClient();
+    if (!admin) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required to save membership requests.');
     if (admin) {
       try {
         const { data: existingCodes } = await admin.from('membership_codes').select('code');
@@ -1315,6 +1317,7 @@ export async function adminProcessMembershipRequest(input: {
 
   if (isSupabaseConfigured()) {
     const admin = createSupabaseAdminClient();
+    if (!admin) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required to process membership requests.');
     if (admin) {
       const { data: reqRow, error: reqErr } = await admin
         .from('membership_requests')
@@ -1443,6 +1446,7 @@ export async function validateMembershipCode(rawCode: string): Promise<Membershi
 
   if (isSupabaseConfigured()) {
     const admin = createSupabaseAdminClient();
+    if (!admin) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required to validate membership codes.');
     if (admin) {
       try {
         const { data: codeRow } = await admin
