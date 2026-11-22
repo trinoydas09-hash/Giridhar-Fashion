@@ -523,16 +523,17 @@ export async function getAdminStoreSnapshot(): Promise<StoreSnapshot> {
 // ============================================================================
 
 export async function upsertProduct(
-  input: Omit<Product, 'id' | 'created_at' | 'updated_at'> & { id?: string }
+  input: Omit<Product, 'id' | 'created_at' | 'updated_at'> & { id?: string },
+  clientOverride?: NonNullable<ReturnType<typeof createSupabaseAdminClient>>
 ): Promise<Product> {
   const now = new Date().toISOString();
   const productId = input.id || `prod-${crypto.randomUUID().slice(0, 8)}`;
 
   if (isSupabaseConfigured()) {
-    const admin = createSupabaseAdminClient();
-    if (!admin) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for admin mutations.');
+    const admin = clientOverride ?? createSupabaseAdminClient();
+    if (!admin) throw new Error('Admin database client unavailable. Please sign in again and retry.');
 
-    const { error: prodErr } = await admin.from('products').upsert({
+    const { data: productRow, error: prodErr } = await admin.from('products').upsert({
       id: productId,
       name: input.name,
       slug: input.slug,
@@ -547,14 +548,15 @@ export async function upsertProduct(
       is_new_arrival: input.is_new_arrival,
       specifications: input.specifications,
       updated_at: now,
-    });
-    if (prodErr) throw new Error(prodErr.message);
+    }).select().single();
+    if (prodErr || !productRow) throw new Error(prodErr?.message || 'Product could not be saved.');
 
-    await admin.from('product_images').delete().eq('product_id', productId);
+    const { error: imageDeleteErr } = await admin.from('product_images').delete().eq('product_id', productId);
+    if (imageDeleteErr) throw new Error(imageDeleteErr.message);
     if (input.images.length > 0) {
       const { error: imgErr } = await admin.from('product_images').insert(
         input.images.map((img, i) => ({
-          id: img.id || `img-${crypto.randomUUID().slice(0, 8)}`,
+          id: !img.id || img.id.startsWith('img-new') ? `img-${crypto.randomUUID().slice(0, 8)}` : img.id,
           product_id: productId,
           url: img.url,
           alt_text: img.alt_text || input.name,
@@ -565,11 +567,12 @@ export async function upsertProduct(
       if (imgErr) throw new Error(imgErr.message);
     }
 
-    await admin.from('product_variants').delete().eq('product_id', productId);
+    const { error: variantDeleteErr } = await admin.from('product_variants').delete().eq('product_id', productId);
+    if (variantDeleteErr) throw new Error(variantDeleteErr.message);
     if (input.variants.length > 0) {
       const { error: varErr } = await admin.from('product_variants').insert(
         input.variants.map((v) => ({
-          id: v.id || `var-${crypto.randomUUID().slice(0, 8)}`,
+          id: !v.id || v.id.startsWith('var-new') ? `var-${crypto.randomUUID().slice(0, 8)}` : v.id,
           product_id: productId,
           colour: v.colour,
           colour_hex: v.colour_hex,
@@ -582,8 +585,23 @@ export async function upsertProduct(
       if (varErr) throw new Error(varErr.message);
     }
 
-    const snap = await loadSupabaseSnapshot(true);
-    return snap.products.find((p) => p.id === productId)!;
+    return {
+      ...(productRow as Product),
+      category: undefined,
+      specifications: Array.isArray(productRow.specifications) ? productRow.specifications : [],
+      images: input.images.map((img, i) => ({
+        ...img,
+        id: img.id && !img.id.startsWith('img-new') ? img.id : `img-${crypto.randomUUID().slice(0, 8)}`,
+        product_id: productId,
+        display_order: i + 1,
+        is_primary: i === 0,
+      })),
+      variants: input.variants.map((v) => ({
+        ...v,
+        id: v.id && !v.id.startsWith('var-new') ? v.id : `var-${crypto.randomUUID().slice(0, 8)}`,
+        product_id: productId,
+      })),
+    } as Product;
   }
 
   const snap = loadLocalStore();
@@ -620,10 +638,13 @@ export async function upsertProduct(
   return saved;
 }
 
-export async function deleteProduct(id: string): Promise<void> {
+export async function deleteProduct(
+  id: string,
+  clientOverride?: NonNullable<ReturnType<typeof createSupabaseAdminClient>>
+): Promise<void> {
   if (isSupabaseConfigured()) {
-    const admin = createSupabaseAdminClient();
-    if (!admin) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required.');
+    const admin = clientOverride ?? createSupabaseAdminClient();
+    if (!admin) throw new Error('Admin database client unavailable. Please sign in again and retry.');
     const { error } = await admin.from('products').delete().eq('id', id);
     if (error) throw new Error(error.message);
     return;
