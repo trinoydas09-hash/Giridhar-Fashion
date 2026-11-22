@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
-import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/server';
+import { createSupabaseAdminClient, createSupabaseServerClient, createSupabaseUserClient } from '@/lib/supabase/server';
 
 const AUTH_STORE_PATH = path.join('/tmp', 'giridhar-admin-auth.json');
 
@@ -186,7 +186,12 @@ export async function requireAdminRequest(
       return { authorized: false, error: 'Authentication required.', status: 401 };
     }
 
-    const reader = adminClient ?? supabase;
+    // When the browser sends a Bearer token, the cookie-based SSR client
+    // does not automatically inherit it. Use a client carrying that exact
+    // verified JWT for the profile/RLS query; otherwise fall back to the
+    // service-role client or the cookie session.
+    const tokenClient = bearer ? createSupabaseUserClient(bearer) : null;
+    const reader = adminClient ?? tokenClient ?? supabase;
     const { data: profile, error: profileErr } = await reader
       .from('profiles')
       .select('role, email')
