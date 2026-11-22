@@ -12,8 +12,8 @@
 @source "../types";
 
 @theme inline {
-  --font-serif: var(--font-cormorant), Georgia, serif;
-  --font-sans: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-cormorant);
+  --font-sans: var(--font-jakarta);
   --color-forest: #173D32;
   --color-forest-dark: #102B23;
   --color-cream: #F5F0E7;
@@ -23,6 +23,10 @@
 }
 
 @layer base {
+  :root {
+    --font-cormorant: Georgia, 'Times New Roman', serif;
+    --font-jakarta: Arial, Helvetica, sans-serif;
+  }
   html {
     scroll-behavior: smooth;
     background-color: #FAF9F6;
@@ -33,13 +37,13 @@
     min-height: 100%;
     background-color: #FAF9F6;
     color: #242424;
-    font-family: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+    font-family: var(--font-jakarta);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, .font-display {
-    font-family: var(--font-cormorant), Georgia, serif;
+    font-family: var(--font-cormorant);
   }
 
   button:not(:disabled),
