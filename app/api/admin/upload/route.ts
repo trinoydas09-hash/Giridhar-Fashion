@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     const bytes = Buffer.from(await file.arrayBuffer());
     const fileName = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}.${ext}`;
 
-    const bearer = req.headers.get('authorization')?.replace(/^Bearer\\s+/i, '').trim();
+    const bearer = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim();
     const userClient = bearer ? createSupabaseUserClient(bearer) : null;
 
     if (userClient || hasSupabaseServiceRole()) {
