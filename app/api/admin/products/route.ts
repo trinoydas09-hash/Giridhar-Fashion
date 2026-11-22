@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAdminRequest } from '@/lib/security/auth';
+import { createSupabaseUserClient } from '@/lib/supabase/server';
 import { deleteProduct, upsertProduct } from '@/lib/services/store-repository';
 import { sanitizeMediaUrl, slugify } from '@/lib/utils/format';
 
@@ -52,6 +53,8 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const bearer = req.headers.get('authorization')?.replace(/^Bearer\\s+/i, '').trim();
+    const userClient = bearer ? createSupabaseUserClient(bearer) : null;
     const body = await req.json();
     const parsed = productSchema.safeParse(body);
     if (!parsed.success) {
@@ -95,7 +98,7 @@ export async function POST(req: NextRequest) {
         stock_quantity: v.stock_quantity,
         created_at: v.created_at || new Date().toISOString(),
       })),
-    });
+    }, userClient ?? undefined);
 
     return NextResponse.json({ product: saved }, { status: 200 });
   } catch (err) {
@@ -116,7 +119,9 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
-    await deleteProduct(id);
+    const bearer = req.headers.get('authorization')?.replace(/^Bearer\\s+/i, '').trim();
+    const userClient = bearer ? createSupabaseUserClient(bearer) : null;
+    await deleteProduct(id, userClient ?? undefined);
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unable to delete product.';
