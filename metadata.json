@@ -1,0 +1,6 @@
+{
+  "name": "GIRIDHAR FASHION",
+  "description": "Modern Minimal Luxury Menswear from Bangladesh — Crafted silhouettes, natural fabrics, and effortless WhatsApp concierge ordering.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <defs>
+    <radialGradient id="studioLight" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#FAF8F3" />
+      <stop offset="100%" stop-color="#EAE3D5" />
+    </radialGradient>
+    <pattern id="weave" width="8" height="8" patternUnits="userSpaceOnUse">
+      <path d="M0 4 H8 M4 0 V8" stroke="#173D32" stroke-width="0.35" opacity="0.06" />
+    </pattern>
+    <filter id="softShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#173D32" flood-opacity="0.14" />
+    </filter>
+  </defs>
+  <rect width="800" height="600" fill="url(#studioLight)" />
+  <rect width="800" height="600" fill="url(#weave)" />
+  <rect x="28" y="28" width="744" height="544" fill="none" stroke="#173D32" stroke-opacity="0.08" stroke-width="1" />
+  <g filter="url(#softShadow)">
+    
+      <g transform="translate(400, 315) scale(0.75)">
+        <path d="M-45,-210 L45,-210 L112,-182 L198,-72 L156,-25 L108,-84 L108,192 L-108,192 L-108,-84 L-156,-25 L-198,-72 L-112,-182 Z"
+              fill="#173D32" stroke="#0E2720" stroke-width="2" />
+        <!-- Classic spread collar -->
+        <path d="M-45,-210 L0,-172 L-62,-160 Z" fill="#173D32" stroke="#0E2720" stroke-width="1.8" />
+        <path d="M45,-210 L0,-172 L62,-160 Z" fill="#173D32" stroke="#0E2720" stroke-width="1.8" />
+        <!-- Twin chest pockets -->
+        <rect x="-82" y="-95" width="54" height="64" rx="2" fill="#173D32" stroke="#0E2720" stroke-width="1.5" />
+        <path d="M-82,-95 L-55,-76 L-28,-95" fill="none" stroke="#0E2720" stroke-width="1.5" />
+        <rect x="28" y="-95" width="54" height="64" rx="2" fill="#173D32" stroke="#0E2720" stroke-width="1.5" />
+        <path d="M28,-95 L55,-76 L82,-95" fill="none" stroke="#0E2720" stroke-width="1.5" />
+        <line x1="0" y1="-172" x2="0" y2="192" stroke="#0E2720" stroke-width="1.5" />
+        <circle cx="0" cy="-135" r="4" fill="#B99A61" />
+        <circle cx="0" cy="-70" r="4" fill="#B99A61" />
+        <circle cx="0" cy="-5" r="4" fill="#B99A61" />
+        <circle cx="0" cy="60" r="4" fill="#B99A61" />
+        <circle cx="0" cy="125" r="4" fill="#B99A61" />
+      </g>
+    
+  </g>
+  <text x="400" y="555" text-anchor="middle" font-family="Georgia, serif" font-size="11" letter-spacing="4" fill="#173D32" opacity="0.45">VINTAGE COLLECTION</text>
+</svg>

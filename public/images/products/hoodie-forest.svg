@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="600" height="800">
+  <defs>
+    <radialGradient id="studioLight" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#F8F6F1" />
+      <stop offset="100%" stop-color="#E5E3DB" />
+    </radialGradient>
+    <pattern id="weave" width="8" height="8" patternUnits="userSpaceOnUse">
+      <path d="M0 4 H8 M4 0 V8" stroke="#173D32" stroke-width="0.35" opacity="0.06" />
+    </pattern>
+    <filter id="softShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#173D32" flood-opacity="0.14" />
+    </filter>
+  </defs>
+  <rect width="600" height="800" fill="url(#studioLight)" />
+  <rect width="600" height="800" fill="url(#weave)" />
+  <rect x="28" y="28" width="544" height="744" fill="none" stroke="#173D32" stroke-opacity="0.08" stroke-width="1" />
+  <g filter="url(#softShadow)">
+    
+      <g transform="translate(300, 420)">
+        <!-- Hood -->
+        <path d="M-55,-205 C-65,-265 65,-265 55,-205 C35,-180 -35,-180 -55,-205 Z" fill="#173D32" stroke="#0D261F" stroke-width="2" />
+        <path d="M-38,-205 C-35,-242 35,-242 38,-205" fill="none" stroke="#B99A61" stroke-width="1.5" opacity="0.5" />
+        <!-- Drop-shoulder body -->
+        <path d="M-55,-205 L-115,-185 L-200,-80 L-160,-30 L-118,-85 L-118,185 L118,185 L118,-85 L160,-30 L200,-80 L115,-185 L55,-205 Z"
+              fill="#173D32" stroke="#0D261F" stroke-width="2" />
+        <!-- Kangaroo pocket -->
+        <path d="M-72,65 L72,65 L86,145 L-86,145 Z" fill="#173D32" stroke="#0D261F" stroke-width="1.6" opacity="0.9" />
+        <line x1="-118" y1="162" x2="118" y2="162" stroke="#0D261F" stroke-width="1.5" opacity="0.6" />
+      </g>
+    
+  </g>
+  <text x="300" y="736" text-anchor="middle" font-family="Georgia, serif" font-size="11" letter-spacing="4" fill="#173D32" opacity="0.45">GIRIDHAR ATELIER · 420 GSM FOREST</text>
+</svg>

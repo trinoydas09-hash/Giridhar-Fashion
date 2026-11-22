@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#242424" />
+      <stop offset="100%" stop-color="#141414" />
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="72%" cy="38%" r="48%">
+      <stop offset="0%" stop-color="#B99A61" stop-opacity="0.28" />
+      <stop offset="100%" stop-color="#B99A61" stop-opacity="0" />
+    </radialGradient>
+    <pattern id="linenGrid" width="16" height="16" patternUnits="userSpaceOnUse">
+      <path d="M0 8 H16 M8 0 V16" stroke="#F5F0E7" stroke-width="0.4" opacity="0.06" />
+    </pattern>
+  </defs>
+  <rect width="1600" height="900" fill="url(#heroGrad)" />
+  <rect width="1600" height="900" fill="url(#sunGlow)" />
+  <rect width="1600" height="900" fill="url(#linenGrid)" />
+  <!-- Architectural draped folds & geometric tailoring lines -->
+  <path d="M980,900 L1180,140 L1290,900 Z" fill="#0E2720" opacity="0.32" />
+  <path d="M1140,900 L1330,210 L1470,900 Z" fill="#0B1F19" opacity="0.45" />
+  <circle cx="1220" cy="250" r="145" fill="#B99A61" opacity="0.16" />
+  <circle cx="1220" cy="250" r="144" fill="none" stroke="#B99A61" stroke-width="1" opacity="0.45" />
+  <!-- Tailored atelier dress-form / coat silhouette right side -->
+  <g transform="translate(1220, 480)" opacity="0.88">
+    <path d="M-55,-245 L55,-245 L145,-205 L245,-45 L188,15 L130,-70 L130,360 L-130,360 L-130,-70 L-188,15 L-245,-45 L-145,-205 Z"
+          fill="#173D32" stroke="#B99A61" stroke-width="1.5" stroke-opacity="0.55" />
+    <path d="M-55,-245 L0,-165 L55,-245" fill="none" stroke="#B99A61" stroke-width="1.5" opacity="0.65" />
+    <line x1="0" y1="-165" x2="0" y2="360" stroke="#B99A61" stroke-width="1" opacity="0.35" />
+  </g>
+  <rect x="48" y="48" width="1504" height="804" fill="none" stroke="#B99A61" stroke-opacity="0.22" stroke-width="1" />
+  <text x="1500" y="815" text-anchor="end" font-family="Georgia, serif" font-size="14" letter-spacing="6" fill="#B99A61" opacity="0.5">VINTAGE & KNITWEAR CAPSULE</text>
+</svg>

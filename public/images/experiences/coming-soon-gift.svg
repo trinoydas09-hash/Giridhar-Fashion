@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <rect width="1200" height="800" fill="#F5F0E7" />
+  <rect x="48" y="48" width="1104" height="704" fill="none" stroke="#173D32" stroke-opacity="0.22" stroke-width="1.5" />
+  <rect x="260" y="180" width="680" height="440" fill="#FAF9F6" stroke="#B99A61" stroke-width="1.5" />
+  <path d="M260,180 L600,420 L940,180" fill="none" stroke="#173D32" stroke-width="2" />
+  <circle cx="600" cy="420" r="42" fill="#173D32" />
+  <text x="600" y="427" text-anchor="middle" font-family="Georgia, serif" font-size="20" fill="#B99A61">GF</text>
+  <text x="600" y="700" text-anchor="middle" font-family="Georgia, serif" font-size="20" letter-spacing="5" fill="#173D32">BESPOKE GIFT DISPATCH</text>
+</svg>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <rect width="1200" height="800" fill="#F5F0E7" />
+  <rect x="210" y="180" width="780" height="440" rx="4" fill="#173D32" stroke="#B99A61" stroke-width="2" />
+  <rect x="242" y="212" width="716" height="376" fill="none" stroke="#B99A61" stroke-opacity="0.45" stroke-width="1" />
+  <text x="600" y="375" text-anchor="middle" font-family="Georgia, serif" font-size="38" letter-spacing="8" fill="#FAF9F6">GIRIDHAR FASHION</text>
+  <text x="600" y="425" text-anchor="middle" font-family="Georgia, serif" font-size="18" letter-spacing="6" fill="#B99A61">DIGITAL ATELIER GIFT CARD</text>
+  <text x="600" y="700" text-anchor="middle" font-family="Georgia, serif" font-size="18" letter-spacing="5" fill="#173D32">MODERN · MINIMAL · DISTINCT</text>
+</svg>
