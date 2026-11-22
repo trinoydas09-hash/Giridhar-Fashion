@@ -22,8 +22,8 @@ interface StoredProviderSecret {
 export const PROVIDER_DEFAULT_MODELS: Record<AIProviderId, { label: string; models: string[]; defaultModel: string }> = {
   gemini: {
     label: 'Google Gemini',
-    defaultModel: 'gemini-2.5-flash-lite',
-    models: ['gemini-2.5-flash-lite'],
+    defaultModel: 'gemini-3.5-flash-lite',
+    models: ['gemini-3.5-flash-lite'],
   },
   openai: {
     label: 'OpenAI (ChatGPT)',
