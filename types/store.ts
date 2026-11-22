@@ -357,7 +357,10 @@ export interface OrderRecord {
   membership_discount?: number;
   total_amount: number;
   channel: 'whatsapp_cart' | 'whatsapp_buy_now';
-  status: 'pending_whatsapp' | 'confirmed' | 'dispatched' | 'completed';
+  status: 'pending_whatsapp' | 'confirmed' | 'rejected' | 'dispatched' | 'completed';
+  payment_status?: 'unverified' | 'paid' | 'unpaid';
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
   created_at: string;
 }
 
