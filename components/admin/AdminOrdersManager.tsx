@@ -187,7 +187,7 @@ export function AdminOrdersManager({
                   <div className="flex flex-wrap gap-2 pt-2 border-t border-[#E4DDD0]">
                     <button type="button" disabled={busyId === order.id} onClick={() => void review(order, 'accept')} className="inline-flex items-center gap-2 px-4 py-2 bg-[#173D32] text-white text-xs font-semibold uppercase tracking-wider disabled:opacity-50"><Check className="w-3.5 h-3.5" /> Accept & Confirm Payment</button>
                     <button type="button" disabled={busyId === order.id} onClick={() => void review(order, 'reject')} className="inline-flex items-center gap-2 px-4 py-2 border border-red-300 text-red-700 text-xs font-semibold uppercase tracking-wider disabled:opacity-50"><XCircle className="w-3.5 h-3.5" /> Reject</button>
-                    <a href={`https://wa.me/${order.customer_phone.replace(/[^\\d]/g, '')}`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 border border-[#D8CFC0] text-xs font-semibold text-[#173D32]">Open WhatsApp</a>
+                    <a href={`https://wa.me/${order.customer_phone.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 border border-[#D8CFC0] text-xs font-semibold text-[#173D32]">Open WhatsApp</a>
                   </div>
                 ) : (
                   <p className="text-[11px] text-[#77736B] border-t border-[#E4DDD0] pt-2">Reviewed {order.reviewed_at ? shortDate(order.reviewed_at) : ''} · {order.payment_status === 'paid' ? 'Payment marked received' : order.payment_status || 'Payment unverified'}{order.reviewed_by ? ` · ${order.reviewed_by}` : ''}</p>
