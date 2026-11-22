@@ -553,35 +553,33 @@ export async function upsertProduct(
 
     const { error: imageDeleteErr } = await admin.from('product_images').delete().eq('product_id', productId);
     if (imageDeleteErr) throw new Error(imageDeleteErr.message);
-    if (input.images.length > 0) {
-      const { error: imgErr } = await admin.from('product_images').insert(
-        input.images.map((img, i) => ({
-          id: !img.id || img.id.startsWith('img-new') ? `img-${crypto.randomUUID().slice(0, 8)}` : img.id,
-          product_id: productId,
-          url: img.url,
-          alt_text: img.alt_text || input.name,
-          display_order: i + 1,
-          is_primary: i === 0 ? true : img.is_primary,
-        }))
-      );
+    const imageRows = input.images.map((img, i) => ({
+      id: !img.id || img.id.startsWith('img-new') ? `img-${crypto.randomUUID().slice(0, 8)}` : img.id,
+      product_id: productId,
+      url: img.url,
+      alt_text: img.alt_text || input.name,
+      display_order: i + 1,
+      is_primary: i === 0 ? true : img.is_primary,
+    }));
+    if (imageRows.length > 0) {
+      const { error: imgErr } = await admin.from('product_images').insert(imageRows);
       if (imgErr) throw new Error(imgErr.message);
     }
 
     const { error: variantDeleteErr } = await admin.from('product_variants').delete().eq('product_id', productId);
     if (variantDeleteErr) throw new Error(variantDeleteErr.message);
-    if (input.variants.length > 0) {
-      const { error: varErr } = await admin.from('product_variants').insert(
-        input.variants.map((v) => ({
-          id: !v.id || v.id.startsWith('var-new') ? `var-${crypto.randomUUID().slice(0, 8)}` : v.id,
-          product_id: productId,
-          colour: v.colour,
-          colour_hex: v.colour_hex,
-          size: v.size,
-          sku: v.sku,
-          stock_status: v.stock_status,
-          stock_quantity: v.stock_quantity,
-        }))
-      );
+    const variantRows = input.variants.map((v) => ({
+      id: !v.id || v.id.startsWith('var-new') ? `var-${crypto.randomUUID().slice(0, 8)}` : v.id,
+      product_id: productId,
+      colour: v.colour,
+      colour_hex: v.colour_hex,
+      size: v.size,
+      sku: v.sku,
+      stock_status: v.stock_status,
+      stock_quantity: v.stock_quantity,
+    }));
+    if (variantRows.length > 0) {
+      const { error: varErr } = await admin.from('product_variants').insert(variantRows);
       if (varErr) throw new Error(varErr.message);
     }
 
@@ -589,18 +587,8 @@ export async function upsertProduct(
       ...(productRow as Product),
       category: undefined,
       specifications: Array.isArray(productRow.specifications) ? productRow.specifications : [],
-      images: input.images.map((img, i) => ({
-        ...img,
-        id: img.id && !img.id.startsWith('img-new') ? img.id : `img-${crypto.randomUUID().slice(0, 8)}`,
-        product_id: productId,
-        display_order: i + 1,
-        is_primary: i === 0,
-      })),
-      variants: input.variants.map((v) => ({
-        ...v,
-        id: v.id && !v.id.startsWith('var-new') ? v.id : `var-${crypto.randomUUID().slice(0, 8)}`,
-        product_id: productId,
-      })),
+      images: imageRows,
+      variants: variantRows,
     } as Product;
   }
 
