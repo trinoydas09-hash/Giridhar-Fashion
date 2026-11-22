@@ -1843,8 +1843,10 @@ export async function createOrderRecord(order: Omit<OrderRecord, 'id' | 'created
         .insert({ ...order, id, created_at: now })
         .select()
         .single();
-      if (!error && data) return data as OrderRecord;
+      if (error || !data) throw new Error(error?.message || 'Order request could not be saved.');
+      return data as OrderRecord;
     }
+    throw new Error('Order database is unavailable. Please try again.');
   }
 
   const snap = loadLocalStore();
@@ -1853,6 +1855,69 @@ export async function createOrderRecord(order: Omit<OrderRecord, 'id' | 'created
   recordActivity(snap, 'WhatsApp order initiated', 'order', `${saved.reference_code} · ${saved.customer_name}`);
   saveLocalStore(snap);
   return saved;
+}
+
+export async function listAdminOrders(
+  clientOverride?: NonNullable<ReturnType<typeof createSupabaseAdminClient>>
+): Promise<OrderRecord[]> {
+  if (isSupabaseConfigured()) {
+    const client = clientOverride ?? createSupabaseAdminClient() ?? (await createSupabaseServerClient());
+    if (!client) throw new Error('Admin database client unavailable.');
+    const { data, error } = await client
+      .from('order_records')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(500);
+    if (error) throw new Error(error.message);
+    return (data || []) as OrderRecord[];
+  }
+  return loadLocalStore().orders || [];
+}
+
+export async function adminReviewOrder(input: {
+  orderId: string;
+  action: 'accept' | 'reject';
+  adminEmail: string;
+  clientOverride?: NonNullable<ReturnType<typeof createSupabaseAdminClient>>;
+}): Promise<OrderRecord> {
+  const now = new Date().toISOString();
+  const nextStatus = input.action === 'accept' ? 'confirmed' : 'rejected';
+  if (isSupabaseConfigured()) {
+    const client = input.clientOverride ?? createSupabaseAdminClient() ?? (await createSupabaseServerClient());
+    if (!client) throw new Error('Admin database client unavailable.');
+    const { data, error } = await client
+      .from('order_records')
+      .update({
+        status: nextStatus,
+        payment_status: input.action === 'accept' ? 'paid' : 'unpaid',
+        reviewed_by: input.adminEmail,
+        reviewed_at: now,
+      })
+      .eq('id', input.orderId)
+      .eq('status', 'pending_whatsapp')
+      .select('*')
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error('This order has already been reviewed or no longer exists.');
+    return data as OrderRecord;
+  }
+
+  const snap = loadLocalStore();
+  const index = snap.orders.findIndex((order) => order.id === input.orderId);
+  if (index < 0) throw new Error('Order not found.');
+  const current = snap.orders[index];
+  if (current.status !== 'pending_whatsapp') throw new Error('This order has already been reviewed.');
+  const updated: OrderRecord = {
+    ...current,
+    status: nextStatus,
+    payment_status: input.action === 'accept' ? 'paid' : 'unpaid',
+    reviewed_by: input.adminEmail,
+    reviewed_at: now,
+  };
+  snap.orders[index] = updated;
+  recordActivity(snap, input.action === 'accept' ? 'Accepted WhatsApp order' : 'Rejected WhatsApp order', 'order', updated.reference_code);
+  saveLocalStore(snap);
+  return updated;
 }
 
 export async function subscribeNewsletter(email: string): Promise<{ ok: boolean; message: string }> {
