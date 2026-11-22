@@ -1,22 +1,8 @@
 import type { Metadata } from 'next';
-import { Cormorant_Garamond, Plus_Jakarta_Sans } from 'next/font/google';
 import { CartProvider } from '@/components/providers/CartProvider';
 import { GiridharAiWidget } from '@/components/storefront/GiridharAiWidget';
 import './globals.css';
 
-const cormorant = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
-  variable: '--font-cormorant',
-  display: 'swap',
-});
-
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-jakarta',
-  display: 'swap',
-});
 
 const appUrl = process.env.APP_URL?.startsWith('http') ? process.env.APP_URL : 'https://giridharfashion.com';
 
@@ -62,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <html lang="en" className={`${cormorant.variable} ${jakarta.variable}`}>
+    <html lang="en" >
       <body suppressHydrationWarning className="min-h-screen bg-[#FAF9F6] text-[#242424] antialiased">
         <script
           type="application/ld+json"
