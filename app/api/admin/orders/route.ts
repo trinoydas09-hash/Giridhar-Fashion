@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const bearer = req.headers.get('authorization')?.replace(/^Bearer\\s+/i, '').trim();
+    const bearer = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim();
     const client = bearer ? createSupabaseUserClient(bearer) : null;
     const orders = await listAdminOrders(client ?? undefined);
     return NextResponse.json({ orders }, { status: 200 });
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const bearer = req.headers.get('authorization')?.replace(/^Bearer\\s+/i, '').trim();
+    const bearer = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim();
     const client = bearer ? createSupabaseUserClient(bearer) : null;
     const order = await adminReviewOrder({
       ...parsed.data,
