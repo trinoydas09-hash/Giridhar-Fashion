@@ -49,7 +49,7 @@ export function AffiliatePortal({ view }: { view: View }) {
     setBusy(true); setNotice('');
     try {
       if (view === 'signup') {
-        const { data: result, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } });
+        const { data: result, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name, whatsapp_number: phone } } });
         if (error) throw error;
         const accessToken = result.session?.access_token;
         if (!accessToken) { setNotice('Account created. Verify your email, then sign in to finish your affiliate application.'); return; }
@@ -60,6 +60,18 @@ export function AffiliatePortal({ view }: { view: View }) {
         const { data: result, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         if (!result.session?.access_token) throw new Error('Sign in did not return a session.');
+        const accessToken = result.session.access_token;
+        const check = await fetch('/api/affiliate', { headers: { Authorization: 'Bearer ' + accessToken }, cache: 'no-store' });
+        if (check.status === 404) {
+          const meta = result.user.user_metadata || {};
+          if (meta.full_name && meta.whatsapp_number) {
+            const apply = await fetch('/api/affiliate', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + accessToken }, body: JSON.stringify({ full_name: meta.full_name, whatsapp_number: meta.whatsapp_number }) });
+            const applied = await apply.json(); if (!apply.ok) throw new Error(applied.error || 'Could not submit affiliate application.');
+          } else {
+            window.location.href = '/affiliates/signup';
+            return;
+          }
+        }
         window.location.href = '/affiliates';
       }
     } catch (err) { setNotice(err instanceof Error ? err.message : 'Authentication failed.'); }
