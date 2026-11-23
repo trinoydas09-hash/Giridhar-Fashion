@@ -18,19 +18,20 @@ export async function GET(req: NextRequest) {
   const access = await authorize(req);
   if ('response' in access) return access.response;
   const { client } = access;
-  const [accounts, links, clicks, commissions, payouts, settings] = await Promise.all([
+  const [accounts, links, clicks, commissions, payouts, settings, orders] = await Promise.all([
     client.from('affiliate_accounts').select('*').order('created_at', { ascending: false }),
     client.from('affiliate_links').select('*').order('created_at', { ascending: false }),
     client.from('affiliate_clicks').select('affiliate_user_id'),
     client.from('affiliate_commissions').select('*').order('created_at', { ascending: false }),
     client.from('affiliate_payout_requests').select('*').order('requested_at', { ascending: false }),
     client.from('affiliate_settings').select('*').eq('id', 'global').maybeSingle(),
+    client.from('order_records').select('affiliate_code, total_amount, status, created_at').not('affiliate_code', 'is', null).order('created_at', { ascending: false }),
   ]);
-  const err = accounts.error || links.error || clicks.error || commissions.error || payouts.error || settings.error;
+  const err = accounts.error || links.error || clicks.error || commissions.error || payouts.error || settings.error || orders.error;
   if (err) return NextResponse.json({ error: err.message }, { status: 500 });
   return NextResponse.json({
     accounts: accounts.data || [], links: links.data || [], clicks: clicks.data || [],
-    commissions: commissions.data || [], payouts: payouts.data || [], settings: settings.data,
+    commissions: commissions.data || [], payouts: payouts.data || [], settings: settings.data, orders: orders.data || [],
   });
 }
 
