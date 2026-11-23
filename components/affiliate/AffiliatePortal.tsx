@@ -8,7 +8,9 @@ type View = 'login' | 'signup' | 'dashboard';
 type Dashboard = {
   account: { full_name: string; affiliate_code: string; status: string; whatsapp_number: string };
   links: Array<{ id: string; destination_url: string; link_type: string; slug: string; created_at: string }>;
-  clicks: number;\n  commissions: Array<{ id: string; order_reference: string; sale_amount: number | string; commission_rate: number | string; commission_amount: number | string; status: string; created_at: string }>;\n  payouts: Array<{ id: string; amount: number | string; status: string; requested_at: string; affiliate_note?: string | null; admin_note?: string | null }>;
+  clicks: number;
+  commissions: Array<{ id: string; order_reference: string; sale_amount: number | string; commission_rate: number | string; commission_amount: number | string; status: string; created_at: string }>;
+  payouts: Array<{ id: string; amount: number | string; status: string; requested_at: string; affiliate_note?: string | null; admin_note?: string | null }>;
   balance: number; paid: number; pendingCommission: number; pendingOrders: number; minimumPayout: number; whatsappNumber?: string;
 };
 
