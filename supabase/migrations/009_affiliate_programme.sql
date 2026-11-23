@@ -86,6 +86,8 @@ alter table public.affiliate_payout_requests enable row level security;
 
 create policy "Admins manage affiliate settings" on public.affiliate_settings
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
+create policy "Affiliates create own pending account" on public.affiliate_accounts
+  for insert to authenticated with check (auth.uid() = user_id and status = 'pending');
 create policy "Affiliates read own account" on public.affiliate_accounts
   for select to authenticated using (auth.uid() = user_id or public.is_admin());
 create policy "Affiliates update own contact details" on public.affiliate_accounts
