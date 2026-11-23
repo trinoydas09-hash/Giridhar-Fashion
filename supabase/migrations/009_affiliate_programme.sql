@@ -119,3 +119,35 @@ grant select, insert, update, delete on public.affiliate_links to authenticated;
 grant select on public.affiliate_clicks to authenticated;
 grant select on public.affiliate_commissions to authenticated;
 grant select, insert on public.affiliate_payout_requests to authenticated;
+
+-- Create a commission only when an admin confirms an attributed WhatsApp order.
+create or replace function public.create_affiliate_commission_for_confirmed_order()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+declare
+  v_rate numeric(5,2);
+begin
+  if new.status = 'confirmed'
+     and old.status = 'pending_whatsapp'
+     and new.affiliate_user_id is not null then
+    select global_commission_rate into v_rate
+    from public.affiliate_settings where id = 'global';
+    v_rate := coalesce(v_rate, 10);
+    insert into public.affiliate_commissions (
+      affiliate_user_id, order_id, order_reference, sale_amount,
+      commission_rate, commission_amount, status
+    ) values (
+      new.affiliate_user_id, new.id, new.reference_code, new.total_amount,
+      v_rate, round(new.total_amount * v_rate / 100, 2), 'approved'
+    ) on conflict (order_id) do nothing;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_affiliate_commission_on_order_confirmed on public.order_records;
+create trigger trg_affiliate_commission_on_order_confirmed
+  after update of status on public.order_records
+  for each row execute function public.create_affiliate_commission_for_confirmed_order();
