@@ -181,7 +181,7 @@ export function AdminOrdersManager({
             {filtered.map((order) => (
               <article key={order.id} className="border border-[#E4DDD0] p-4 sm:p-5 space-y-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div><p className="font-semibold text-[#242424]">{order.reference_code} · {order.customer_name}</p><p className="text-xs text-[#5A5853] mt-1">{shortDate(order.created_at)} · {order.customer_phone}</p></div>
+                  <div><p className="font-semibold text-[#242424]">{order.reference_code} · {order.customer_name}</p><p className="text-xs text-[#5A5853] mt-1">{shortDate(order.created_at)} · {order.customer_phone}</p>{order.affiliate_code && <p className="text-[11px] text-[#173D32] mt-1">Affiliate referral: {order.affiliate_code}</p>}</div>
                   <span className={`text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 border ${order.status === 'pending_whatsapp' ? 'border-[#D6B46A] text-[#946A22] bg-[#FBF7ED]' : order.status === 'rejected' ? 'border-red-200 text-red-700 bg-red-50' : 'border-[#B8C9C0] text-[#173D32] bg-[#F2F7F3]'}`}>
                     {order.status === 'pending_whatsapp' ? 'Pending' : order.status === 'rejected' ? 'Rejected' : order.status === 'confirmed' ? 'Accepted' : order.status}
                   </span>
