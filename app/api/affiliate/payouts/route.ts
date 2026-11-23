@@ -4,7 +4,8 @@ import { createSupabaseUserClient } from '@/lib/supabase/server';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-  const token = req.headers.get('authorization')?.replace(/^Bearer\\s+/i, '').trim();
+  // Strip the HTTP Bearer scheme before passing the JWT to Supabase.
+  const token = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim();
   const client = token ? createSupabaseUserClient(token) : null;
   if (!client) return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
 
