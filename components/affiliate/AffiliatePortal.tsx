@@ -53,9 +53,10 @@ export function AffiliatePortal({ view }: { view: View }) {
         const { data: result, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name, whatsapp_number: phone } } });
         if (error) throw error;
         const accessToken = result.session?.access_token;
-        if (!accessToken) { setNotice('Account created. Verify your email, then sign in to finish your affiliate application.'); return; }
-        const res = await fetch('/api/affiliate', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + accessToken }, body: JSON.stringify({ full_name: name, whatsapp_number: phone }) });
-        const json = await res.json(); if (!res.ok) throw new Error(json.error || 'Could not submit affiliate application.');
+        if (!accessToken) {
+          setNotice('Application received as pending. Please verify your email, then sign in to check your application status.');
+          return;
+        }
         window.location.href = '/affiliates';
       } else {
         const { data: result, error } = await supabase.auth.signInWithPassword({ email, password });
