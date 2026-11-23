@@ -76,9 +76,12 @@ export function AdminOrdersManager({
     const weekStart = new Date(now);
     weekStart.setDate(now.getDate() - ((now.getDay() + 6) % 7));
     weekStart.setHours(0, 0, 0, 0);
+    const todayStart = new Date(now);
+    todayStart.setHours(0, 0, 0, 0);
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const accepted = orders.filter(isAccepted);
     const sum = (items: OrderRecord[]) => items.reduce((total, order) => total + Number(order.total_amount || 0), 0);
+    const today = orders.filter((order) => new Date(order.created_at) >= todayStart);
     const week = orders.filter((order) => new Date(order.created_at) >= weekStart);
     const month = orders.filter((order) => new Date(order.created_at) >= monthStart);
     return {
@@ -87,6 +90,8 @@ export function AdminOrdersManager({
       accepted: accepted.length,
       rejected: orders.filter((order) => order.status === 'rejected').length,
       revenue: sum(accepted),
+      todayCount: today.length,
+      todayRevenue: sum(today.filter(isAccepted)),
       weekCount: week.length,
       weekRevenue: sum(week.filter(isAccepted)),
       monthCount: month.length,
@@ -147,15 +152,16 @@ export function AdminOrdersManager({
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="bg-[#FAF9F6] border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#5A5853]">Total Requests</p><p className="font-serif text-2xl mt-1">{stats.total}</p></div>
-          <div className="bg-[#FAF9F6] border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#9A6B1E]">Pending Review</p><p className="font-serif text-2xl mt-1 text-[#9A6B1E]">{stats.pending}</p></div>
-          <div className="bg-[#FAF9F6] border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#173D32]">Accepted Revenue</p><p className="font-serif text-xl mt-1 text-[#173D32]">{money(stats.revenue, currencySymbol)}</p></div>
-          <div className="bg-[#FAF9F6] border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#5A5853]">Accepted Orders</p><p className="font-serif text-2xl mt-1">{stats.accepted}</p></div>
+          <div className="bg-[#FAF9F6] border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#5A5853]">All-Time Revenue</p><p className="font-serif text-xl mt-1 text-[#173D32]">{money(stats.revenue, currencySymbol)}</p><p className="text-[10px] text-[#77736B] mt-1">{stats.accepted} accepted orders</p></div>
+          <div className="bg-[#FAF9F6] border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#173D32]">Today's Revenue</p><p className="font-serif text-xl mt-1 text-[#173D32]">{money(stats.todayRevenue, currencySymbol)}</p><p className="text-[10px] text-[#77736B] mt-1">{stats.todayCount} order requests today</p></div>
+          <div className="bg-[#FAF9F6] border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#173D32]">This Week's Revenue</p><p className="font-serif text-xl mt-1 text-[#173D32]">{money(stats.weekRevenue, currencySymbol)}</p><p className="text-[10px] text-[#77736B] mt-1">{stats.weekCount} order requests this week</p></div>
+          <div className="bg-[#FAF9F6] border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#173D32]">This Month's Revenue</p><p className="font-serif text-xl mt-1 text-[#173D32]">{money(stats.monthRevenue, currencySymbol)}</p><p className="text-[10px] text-[#77736B] mt-1">{stats.monthCount} order requests this month</p></div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#5A5853]">This Week</p><p className="font-serif text-xl mt-1">{stats.weekCount} orders · {money(stats.weekRevenue, currencySymbol)} accepted</p></div>
-          <div className="border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#5A5853]">This Month</p><p className="font-serif text-xl mt-1">{stats.monthCount} orders · {money(stats.monthRevenue, currencySymbol)} accepted</p></div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#5A5853]">Total Requests</p><p className="font-serif text-2xl mt-1">{stats.total}</p></div>
+          <div className="border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#9A6B1E]">Pending Review</p><p className="font-serif text-2xl mt-1 text-[#9A6B1E]">{stats.pending}</p></div>
+          <div className="border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#5A5853]">Rejected Orders</p><p className="font-serif text-2xl mt-1">{stats.rejected}</p></div>
         </div>
       </div>
 
