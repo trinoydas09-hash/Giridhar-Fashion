@@ -8,7 +8,7 @@ type View = 'login' | 'signup' | 'dashboard';
 type Dashboard = {
   account: { full_name: string; affiliate_code: string; status: string; whatsapp_number: string };
   links: Array<{ id: string; destination_url: string; link_type: string; slug: string; created_at: string }>;
-  clicks: number; commissions: Array<Record<string, unknown>>; payouts: Array<Record<string, unknown>>;
+  clicks: number;\n  commissions: Array<{ id: string; order_reference: string; sale_amount: number | string; commission_rate: number | string; commission_amount: number | string; status: string; created_at: string }>;\n  payouts: Array<{ id: string; amount: number | string; status: string; requested_at: string; affiliate_note?: string | null; admin_note?: string | null }>;
   balance: number; paid: number; pendingCommission: number; pendingOrders: number; minimumPayout: number; whatsappNumber?: string;
 };
 
@@ -138,8 +138,8 @@ export function AffiliatePortal({ view }: { view: View }) {
         </div>}
         {notice && <p role="status" className="text-xs text-[#8A5B20]">{notice}</p>}
         <section className="border bg-white p-5 space-y-3"><h2 className="font-serif text-xl">Your Referral Links</h2>{data.links.length===0?<p className="text-xs text-[#777]">No links created yet.</p>:data.links.map(link=><div key={link.id} className="border-b py-3 text-xs break-all"><p className="font-semibold">{link.link_type.toUpperCase()}</p><p>/r/{link.slug}</p><p className="text-[#777] mt-1">{link.destination_url}</p><button type="button" onClick={async()=>{await navigator.clipboard.writeText(window.location.origin + '/r/' + link.slug);setNotice('Referral link copied.');}} className="mt-2 border px-3 py-2 text-[10px] uppercase text-[#173D32]">Copy Referral Link</button></div>)}</section>
-        <section className="border bg-white p-5 space-y-3"><h2 className="font-serif text-xl">Commission History</h2>{data.commissions.length===0?<p className="text-xs text-[#777]">No confirmed referrals yet.</p>:data.commissions.map((c:any)=><div key={c.id} className="flex justify-between gap-3 border-b py-2 text-xs"><span>{c.order_reference} · {c.commission_rate}%</span><b>৳{Number(c.commission_amount).toLocaleString('en-BD')} · {c.status}</b></div>)}</section>
-        <section className="border bg-white p-5 space-y-3"><h2 className="font-serif text-xl">Payout History</h2>{data.payouts.length===0?<p className="text-xs text-[#777]">No payout requests yet.</p>:data.payouts.map((p:any)=><div key={p.id} className="flex justify-between gap-3 border-b py-2 text-xs"><span>{new Date(p.requested_at).toLocaleDateString()}</span><b>৳{Number(p.amount).toLocaleString('en-BD')} · {p.status}</b></div>)}</section>
+        <section className="border bg-white p-5 space-y-3"><h2 className="font-serif text-xl">Commission History</h2>{data.commissions.length===0?<p className="text-xs text-[#777]">No confirmed referrals yet.</p>:data.commissions.map((c)=><div key={c.id} className="flex justify-between gap-3 border-b py-2 text-xs"><span>{c.order_reference} · {c.commission_rate}%</span><b>৳{Number(c.commission_amount).toLocaleString('en-BD')} · {c.status}</b></div>)}</section>
+        <section className="border bg-white p-5 space-y-3"><h2 className="font-serif text-xl">Payout History</h2>{data.payouts.length===0?<p className="text-xs text-[#777]">No payout requests yet.</p>:data.payouts.map((p)=><div key={p.id} className="flex justify-between gap-3 border-b py-2 text-xs"><span>{new Date(p.requested_at).toLocaleDateString()}</span><b>৳{Number(p.amount).toLocaleString('en-BD')} · {p.status}</b></div>)}</section>
       </div>
     </main>
   );
