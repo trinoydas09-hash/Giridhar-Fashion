@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { CartProvider } from '@/components/providers/CartProvider';
 import { GiridharAiWidget } from '@/components/storefront/GiridharAiWidget';
+import { StorefrontWidthDiagnostic } from '@/components/storefront/StorefrontWidthDiagnostic';
 import './globals.css';
 
 const appUrl = process.env.APP_URL?.startsWith('http')
@@ -55,6 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CartProvider>
           {children}
           <GiridharAiWidget />
+          <StorefrontWidthDiagnostic />
         </CartProvider>
       </body>
     </html>
