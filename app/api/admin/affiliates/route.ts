@@ -58,7 +58,8 @@ export async function POST(req: NextRequest) {
       status: action.status, admin_note: action.note || null,
       reviewed_at: new Date().toISOString(), reviewed_by: auth.email,
     };
-    const { error } = await client.from('affiliate_payout_requests').update(updates).eq('id', action.payoutId);
+    const { error, data } = await client.from('affiliate_payout_requests').update(updates).eq('id', action.payoutId).in('status', ['pending', 'processing']).select('id').maybeSingle();
+    if (!error && !data) return NextResponse.json({ error: 'This payout request has already been reviewed.' }, { status: 409 });
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   }
   return NextResponse.json({ ok: true });
