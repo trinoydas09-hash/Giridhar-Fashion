@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 async function authorize(req: NextRequest) {
   const auth = await requireAdminRequest(req);
   if (!auth.authorized) return { response: NextResponse.json({ error: auth.error }, { status: auth.status }) };
-  const token = req.headers.get('authorization')?.replace(/^Bearer\\s+/i, '').trim();
+  const token = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim();
   const client = token ? createSupabaseUserClient(token) : null;
   if (!client) return { response: NextResponse.json({ error: 'Admin database session unavailable.' }, { status: 401 }) };
   return { auth, client };
