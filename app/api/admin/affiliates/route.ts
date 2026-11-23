@@ -58,21 +58,6 @@ export async function POST(req: NextRequest) {
       status: action.status, admin_note: action.note || null,
       reviewed_at: new Date().toISOString(), reviewed_by: auth.email,
     };
-    if (action.status === 'paid') {
-      const { data: payout } = await client.from('affiliate_payout_requests').select('affiliate_user_id, amount').eq('id', action.payoutId).maybeSingle();
-      if (!payout) return NextResponse.json({ error: 'Payout request not found.' }, { status: 404 });
-      const { data: commissions } = await client.from('affiliate_commissions').select('id, commission_amount').eq('affiliate_user_id', payout.affiliate_user_id).eq('status', 'approved').order('created_at', { ascending: true });
-      let remaining = Number(payout.amount);
-      for (const row of commissions || []) {
-        if (remaining <= 0) break;
-        if (Number(row.commission_amount) <= remaining) {
-          const { error: paidError } = await client.from('affiliate_commissions').update({ status: 'paid', paid_at: new Date().toISOString(), paid_by: auth.email }).eq('id', row.id);
-          if (paidError) return NextResponse.json({ error: paidError.message }, { status: 400 });
-          remaining -= Number(row.commission_amount);
-        }
-      }
-      if (remaining > 0) return NextResponse.json({ error: 'Payout amount does not match whole approved commission entries. Adjust payout amount before marking paid.' }, { status: 400 });
-    }
     const { error } = await client.from('affiliate_payout_requests').update(updates).eq('id', action.payoutId);
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   }
