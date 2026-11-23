@@ -1,27 +1,29 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 type Props = { token: string; onNotice: (type: 'ok'|'err', text: string) => void };
 export function AdminAffiliatesManager({ token, onNotice }: Props) {
   const [data, setData] = useState<any>(null);
   const [rate, setRate] = useState('10');
   const [busy, setBusy] = useState(false);
+  const onNoticeRef = useRef(onNotice);
+  useEffect(() => { onNoticeRef.current = onNotice; }, [onNotice]);
   const load = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/affiliates', { headers: { Authorization: 'Bearer '+token }, cache: 'no-store' });
       const json = await res.json(); if (!res.ok) throw new Error(json.error || 'Unable to load affiliates.');
       setData(json); setRate(String(json.settings?.global_commission_rate ?? 10));
-    } catch (e) { onNotice('err', e instanceof Error ? e.message : 'Unable to load affiliates.'); }
-  }, [token, onNotice]);
+    } catch (e) { onNoticeRef.current('err', e instanceof Error ? e.message : 'Unable to load affiliates.'); }
+  }, [token]);
   useEffect(() => { void load(); }, [load]);
   const action = async (body: Record<string, unknown>, success: string) => {
     setBusy(true);
     try {
       const res = await fetch('/api/admin/affiliates', { method:'POST', headers:{'Content-Type':'application/json',Authorization:'Bearer '+token}, body:JSON.stringify(body) });
       const json = await res.json(); if (!res.ok) throw new Error(json.error || 'Action failed.');
-      onNotice('ok', success); await load();
-    } catch(e) { onNotice('err', e instanceof Error ? e.message : 'Action failed.'); }
+      onNoticeRef.current('ok', success); await load();
+    } catch(e) { onNoticeRef.current('err', e instanceof Error ? e.message : 'Action failed.'); }
     finally { setBusy(false); }
   };
   if (!data) return <div className="border bg-white p-8 text-sm">Loading affiliate accounts…</div>;
