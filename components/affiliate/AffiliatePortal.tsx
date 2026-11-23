@@ -9,7 +9,7 @@ type Dashboard = {
   account: { full_name: string; affiliate_code: string; status: string; whatsapp_number: string };
   links: Array<{ id: string; destination_url: string; link_type: string; slug: string; created_at: string }>;
   clicks: number; commissions: Array<Record<string, unknown>>; payouts: Array<Record<string, unknown>>;
-  balance: number; paid: number; minimumPayout: number; whatsappNumber?: string;
+  balance: number; paid: number; pendingCommission: number; pendingOrders: number; minimumPayout: number; whatsappNumber?: string;
 };
 
 export function AffiliatePortal({ view }: { view: View }) {
@@ -128,8 +128,8 @@ export function AffiliatePortal({ view }: { view: View }) {
       <div className="mx-auto max-w-6xl space-y-7">
         <header className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-[11px] uppercase tracking-[.2em] text-[#B99A61]">Affiliate Programme</p><h1 className="font-serif text-3xl text-[#173D32]">Welcome, {data.account.full_name}</h1><p className="text-xs text-[#666] mt-1">Affiliate ID: {data.account.affiliate_code}</p></div><button onClick={async()=>{await supabase?.auth.signOut();window.location.href='/affiliates/login';}} className="border px-4 py-2 text-xs">Sign out</button></header>
         {status !== 'active' && <div className="border border-[#D6B46A] bg-[#FBF7ED] p-4 text-sm">Your application status: <b className="capitalize">{status}</b>. Link creation and commissions will be enabled after admin approval.</div>}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[['Clicks',data.clicks],['Approved Balance','৳'+data.balance.toLocaleString('en-BD')],['Paid','৳'+data.paid.toLocaleString('en-BD')],['Orders',data.commissions.length]].map(([label,value])=><div key={String(label)} className="border bg-white p-4"><p className="text-[10px] uppercase text-[#777]">{label}</p><p className="font-serif text-2xl text-[#173D32] mt-2">{value}</p></div>)}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {[['Clicks',data.clicks],['Pending Commission','৳'+data.pendingCommission.toLocaleString('en-BD')],['Available Balance','৳'+data.balance.toLocaleString('en-BD')],['Paid','৳'+data.paid.toLocaleString('en-BD')],['Confirmed Sales',data.commissions.length]].map(([label,value])=><div key={String(label)} className="border bg-white p-4"><p className="text-[10px] uppercase text-[#777]">{label}</p><p className="font-serif text-2xl text-[#173D32] mt-2">{value}</p>{label==='Pending Commission' && <p className="text-[10px] text-[#777] mt-1">{data.pendingOrders} orders awaiting review</p>}</div>)}
         </div>
         {status === 'active' && <div className="grid md:grid-cols-2 gap-5">
           <form onSubmit={createLink} className="border bg-white p-5 space-y-3"><h2 className="font-serif text-xl">Build Your Affiliate Link</h2><label className="block text-xs">Link type<select value={linkType} onChange={e=>setLinkType(e.target.value)} className="mt-1 w-full border p-3"><option value="product">Product URL</option><option value="category">Category URL</option><option value="page">Page URL</option></select></label><label className="block text-xs">Paste website URL<input required type="url" value={url} onChange={e=>setUrl(e.target.value)} placeholder="https://yourwebsite.com/product/..." className="mt-1 w-full border p-3" /></label><button disabled={busy} className="bg-[#173D32] text-white px-5 py-3 text-xs uppercase">Generate & Copy Link</button></form>
