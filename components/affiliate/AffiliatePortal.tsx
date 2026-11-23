@@ -23,6 +23,7 @@ export function AffiliatePortal({ view }: { view: View }) {
   const [url, setUrl] = useState('');
   const [linkType, setLinkType] = useState('product');
   const [payoutAmount, setPayoutAmount] = useState('');
+  const [payoutWhatsAppUrl, setPayoutWhatsAppUrl] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -97,7 +98,7 @@ export function AffiliatePortal({ view }: { view: View }) {
       const msg = encodeURIComponent('Hello GIRIDHAR FASHION, I have submitted an affiliate payout request. Affiliate ID: ' + data?.account.affiliate_code + '. Amount: ৳' + payoutAmount + '. Please review my payout.');
       const number = data?.whatsappNumber?.replace(/\D/g, '');
       setNotice('Payout request submitted. Contact the store on WhatsApp to coordinate payment.');
-      if (number) window.open('https://wa.me/' + number + '?text=' + msg, '_blank', 'noopener,noreferrer');
+      if (number) setPayoutWhatsAppUrl('https://wa.me/' + number + '?text=' + msg);
       await loadDashboard(token);
     } catch (err) { setNotice(err instanceof Error ? err.message : 'Payout request failed.'); }
     finally { setBusy(false); }
