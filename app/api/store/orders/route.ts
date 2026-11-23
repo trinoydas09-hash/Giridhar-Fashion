@@ -206,8 +206,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: wa.error || 'Unable to generate WhatsApp order link.' }, { status: 400 });
     }
 
+    const rawAffiliateCode = req.cookies.get('gf_affiliate_ref')?.value || null;
+    const affiliateCode = rawAffiliateCode && /^[A-Z0-9]{6,16}$/.test(rawAffiliateCode)
+      ? rawAffiliateCode
+      : null;
+
     const record = await createOrderRecord({
       reference_code: referenceCode,
+      ...(affiliateCode ? { affiliate_code: affiliateCode } : {}),
       customer_name,
       customer_phone,
       delivery_address,

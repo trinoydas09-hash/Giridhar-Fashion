@@ -51,9 +51,9 @@ export function Navbar({ settings }: NavbarProps) {
 
       <header className="sticky top-0 z-40 bg-[#FAF9F6]/95 backdrop-blur-md border-b border-[#E4DDD0]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 md:h-[72px] items-center justify-between gap-4 md:gap-6">
+          <div className="flex h-16 md:h-[72px] items-center justify-between gap-1 sm:gap-4 md:gap-6 min-w-0">
             {/* Zone 1: Brand Identity */}
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-1 sm:gap-3 shrink-0 min-w-0">
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(true)}
@@ -64,14 +64,14 @@ export function Navbar({ settings }: NavbarProps) {
               </button>
               <Link
                 href="/"
-                className="flex items-center gap-2.5 whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#173D32]"
+                className="flex items-center gap-1 sm:gap-2.5 whitespace-nowrap shrink-0 min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#173D32]"
               >
                 <img
                   src={settings.logo_url || '/assets/aistudio/image_32af7105.png'}
                   alt={settings.brand_name}
-                  className="h-9 md:h-10 w-auto object-contain mix-blend-multiply"
+                  className="h-8 sm:h-9 md:h-10 w-auto object-contain mix-blend-multiply"
                 />
-                <span className="font-serif text-lg md:text-xl font-bold tracking-[0.06em] text-[#173D32] whitespace-nowrap shrink-0">
+                <span className="font-serif text-[13px] sm:text-lg md:text-xl font-bold tracking-[0.01em] sm:tracking-[0.06em] text-[#173D32] whitespace-nowrap shrink-0">
                   {settings.brand_name}
                 </span>
               </Link>
@@ -124,15 +124,15 @@ export function Navbar({ settings }: NavbarProps) {
                 </Link>
               )}
               <Link
-                href="/admin"
+                href="/affiliates"
                 className="whitespace-nowrap shrink-0 text-[#5A5853] hover:text-[#173D32] transition-colors py-1 border-b border-transparent hover:border-[#B99A61]"
               >
-                Admin
+                Affiliate Programme
               </Link>
             </nav>
 
             {/* Zone 3: Search & Shopping Bag Action */}
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="flex items-center gap-1 sm:gap-3 shrink-0">
               <button
                 type="button"
                 onClick={() => setSearchOpen((prev) => !prev)}
@@ -146,10 +146,10 @@ export function Navbar({ settings }: NavbarProps) {
                 type="button"
                 onClick={() => setDrawerOpen(true)}
                 aria-label="Open shopping bag"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-[#173D32] text-[#FAF9F6] text-xs font-semibold tracking-[0.12em] uppercase hover:bg-[#102B23] transition-colors whitespace-nowrap shrink-0 min-h-[40px]"
+                className="inline-flex items-center justify-center gap-2 px-2 sm:px-4 py-2 bg-[#173D32] text-[#FAF9F6] text-xs font-semibold tracking-[0.12em] uppercase hover:bg-[#102B23] transition-colors whitespace-nowrap shrink-0 min-h-[40px] min-w-[40px]"
               >
                 <ShoppingBag className="w-4 h-4" />
-                <span className="tabular-nums">Bag ({hydrated ? itemCount : 0})</span>
+                <span className="tabular-nums hidden sm:inline">Bag ({hydrated ? itemCount : 0})</span>
               </button>
             </div>
           </div>
@@ -270,11 +270,11 @@ export function Navbar({ settings }: NavbarProps) {
                   Shopping Bag ({hydrated ? itemCount : 0})
                 </Link>
                 <Link
-                  href="/admin"
+                  href="/affiliates"
                   onClick={() => setMobileMenuOpen(false)}
                   className="py-3.5 text-base font-medium text-[#5A5853]"
                 >
-                  Admin Dashboard
+                  Affiliate Programme
                 </Link>
               </nav>
             </div>

@@ -70,6 +70,7 @@ export function Footer({ settings }: { settings: StoreSettings }) {
               )}
               <li><Link href="/cart" className="hover:text-white transition-colors">Shopping Bag</Link></li>
               <li><Link href="/checkout" className="hover:text-white transition-colors">WhatsApp Checkout</Link></li>
+              <li><Link href="/affiliates" className="hover:text-white transition-colors">Affiliate Programme</Link></li>
               <li><Link href="/admin" className="hover:text-white transition-colors">Store Admin</Link></li>
             </ul>
           </div>

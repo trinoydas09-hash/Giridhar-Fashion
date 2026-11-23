@@ -35,6 +35,7 @@ import {
   StoreSnapshot,
 } from '@/types/store';
 import { AdminAuthGate } from './AdminAuthGate';
+import { AdminAffiliatesManager } from './AdminAffiliatesManager';
 import { AdminBrandExperienceManager } from './AdminBrandExperienceManager';
 import { AdminMembershipManager } from './AdminMembershipManager';
 import { AdminOffersManager } from './AdminOffersManager';
@@ -50,6 +51,7 @@ type AdminTab =
   | 'brand_experience'
   | 'offers'
   | 'orders'
+  | 'affiliates'
   | 'promotions'
   | 'membership'
   | 'settings'
@@ -481,6 +483,7 @@ export function AdminDashboardClient() {
     { key: 'brand_experience', label: 'Brand Experience', icon: Sparkles },
     { key: 'offers', label: 'Offers & Combos', icon: Tag },
     { key: 'orders', label: 'Orders & Revenue', icon: ShoppingCart },
+    { key: 'affiliates', label: 'Affiliates', icon: Award },
     { key: 'promotions', label: 'Campaigns', icon: Megaphone },
     { key: 'membership', label: 'Membership', icon: Award },
     { key: 'settings', label: 'Store Settings', icon: SettingsIcon },
@@ -1462,6 +1465,11 @@ export function AdminDashboardClient() {
                 currencySymbol={snapshot.settings.currency_symbol}
                 onNotice={flashNotice}
               />
+            )}
+
+            {/* AFFILIATE PROGRAMME TAB */}
+            {activeTab === 'affiliates' && snapshot && (
+              <AdminAffiliatesManager token={session.token} onNotice={flashNotice} />
             )}
 
             {/* PREMIUM MEMBERSHIP TAB */}

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { CartProvider } from '@/components/providers/CartProvider';
 import { GiridharAiWidget } from '@/components/storefront/GiridharAiWidget';
 import './globals.css';
@@ -6,6 +6,12 @@ import './globals.css';
 const appUrl = process.env.APP_URL?.startsWith('http')
   ? process.env.APP_URL
   : 'https://giridhar-fashion.vercel.app';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),

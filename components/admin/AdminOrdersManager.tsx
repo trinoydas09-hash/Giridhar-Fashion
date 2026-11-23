@@ -153,9 +153,9 @@ export function AdminOrdersManager({
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="bg-[#FAF9F6] border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#5A5853]">All-Time Revenue</p><p className="font-serif text-xl mt-1 text-[#173D32]">{money(stats.revenue, currencySymbol)}</p><p className="text-[10px] text-[#77736B] mt-1">{stats.accepted} accepted orders</p></div>
-          <div className="bg-[#FAF9F6] border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#173D32]">Today's Revenue</p><p className="font-serif text-xl mt-1 text-[#173D32]">{money(stats.todayRevenue, currencySymbol)}</p><p className="text-[10px] text-[#77736B] mt-1">{stats.todayCount} order requests today</p></div>
-          <div className="bg-[#FAF9F6] border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#173D32]">This Week's Revenue</p><p className="font-serif text-xl mt-1 text-[#173D32]">{money(stats.weekRevenue, currencySymbol)}</p><p className="text-[10px] text-[#77736B] mt-1">{stats.weekCount} order requests this week</p></div>
-          <div className="bg-[#FAF9F6] border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#173D32]">This Month's Revenue</p><p className="font-serif text-xl mt-1 text-[#173D32]">{money(stats.monthRevenue, currencySymbol)}</p><p className="text-[10px] text-[#77736B] mt-1">{stats.monthCount} order requests this month</p></div>
+          <div className="bg-[#FAF9F6] border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#173D32]">Today&apos;s Revenue</p><p className="font-serif text-xl mt-1 text-[#173D32]">{money(stats.todayRevenue, currencySymbol)}</p><p className="text-[10px] text-[#77736B] mt-1">{stats.todayCount} order requests today</p></div>
+          <div className="bg-[#FAF9F6] border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#173D32]">This Week&apos;s Revenue</p><p className="font-serif text-xl mt-1 text-[#173D32]">{money(stats.weekRevenue, currencySymbol)}</p><p className="text-[10px] text-[#77736B] mt-1">{stats.weekCount} order requests this week</p></div>
+          <div className="bg-[#FAF9F6] border border-[#E4DDD0] p-4"><p className="text-[10px] uppercase tracking-wider text-[#173D32]">This Month&apos;s Revenue</p><p className="font-serif text-xl mt-1 text-[#173D32]">{money(stats.monthRevenue, currencySymbol)}</p><p className="text-[10px] text-[#77736B] mt-1">{stats.monthCount} order requests this month</p></div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -181,7 +181,7 @@ export function AdminOrdersManager({
             {filtered.map((order) => (
               <article key={order.id} className="border border-[#E4DDD0] p-4 sm:p-5 space-y-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div><p className="font-semibold text-[#242424]">{order.reference_code} · {order.customer_name}</p><p className="text-xs text-[#5A5853] mt-1">{shortDate(order.created_at)} · {order.customer_phone}</p></div>
+                  <div><p className="font-semibold text-[#242424]">{order.reference_code} · {order.customer_name}</p><p className="text-xs text-[#5A5853] mt-1">{shortDate(order.created_at)} · {order.customer_phone}</p>{order.affiliate_code && <p className="text-[11px] text-[#173D32] mt-1">Affiliate referral: {order.affiliate_code}</p>}</div>
                   <span className={`text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 border ${order.status === 'pending_whatsapp' ? 'border-[#D6B46A] text-[#946A22] bg-[#FBF7ED]' : order.status === 'rejected' ? 'border-red-200 text-red-700 bg-red-50' : 'border-[#B8C9C0] text-[#173D32] bg-[#F2F7F3]'}`}>
                     {order.status === 'pending_whatsapp' ? 'Pending' : order.status === 'rejected' ? 'Rejected' : order.status === 'confirmed' ? 'Accepted' : order.status}
                   </span>
