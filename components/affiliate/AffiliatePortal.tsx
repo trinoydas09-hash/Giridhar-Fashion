@@ -57,7 +57,7 @@ export function AffiliatePortal({ view }: { view: View }) {
           setNotice('Application received as pending. Please verify your email, then sign in to check your application status.');
           return;
         }
-        window.location.href = '/affiliates';
+        window.location.href = '/affiliates/dashboard';
       } else {
         const { data: result, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -74,7 +74,7 @@ export function AffiliatePortal({ view }: { view: View }) {
             return;
           }
         }
-        window.location.href = '/affiliates';
+        window.location.href = '/affiliates/dashboard';
       }
     } catch (err) { setNotice(err instanceof Error ? err.message : 'Authentication failed.'); }
     finally { setBusy(false); }
