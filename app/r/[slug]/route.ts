@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'node:crypto';
 import { createSupabaseAdminClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -23,7 +24,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
   const siteOrigin = new URL(req.url).origin;
   if (destination.origin !== siteOrigin) return NextResponse.redirect(new URL('/', req.url));
 
-  const visitorHash = req.headers.get('x-vercel-id') || req.headers.get('x-forwarded-for')?.split(',')[0] || null;
+  const visitor = req.headers.get('x-vercel-id') || req.headers.get('x-forwarded-for')?.split(',')[0] || req.headers.get('user-agent') || 'unknown';
+  const visitorHash = crypto.createHash('sha256').update(visitor).digest('hex');
   await admin.from('affiliate_clicks').insert({
     affiliate_user_id: link.affiliate_user_id,
     affiliate_link_id: link.id,
