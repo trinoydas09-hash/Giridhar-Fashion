@@ -8,7 +8,6 @@ import {
   validateMembershipCode,
 } from '@/lib/services/store-repository';
 import { generateWhatsAppCheckoutUrl, validateCustomerPhone } from '@/lib/whatsapp/checkout';
-import { createSupabaseAdminClient } from '@/lib/supabase/server';
 
 const orderItemSchema = z.object({
   item_type: z.enum(['product', 'surprise_box']).optional().default('product'),
@@ -207,23 +206,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: wa.error || 'Unable to generate WhatsApp order link.' }, { status: 400 });
     }
 
-    const affiliateCode = req.cookies.get('gf_affiliate_ref')?.value || null;
-    const affiliateAdmin = affiliateCode ? createSupabaseAdminClient() : null;
-    let affiliateUserId: string | null = null;
-    if (affiliateCode && affiliateAdmin) {
-      const { data: affiliate } = await affiliateAdmin
-        .from('affiliate_accounts')
-        .select('user_id')
-        .eq('affiliate_code', affiliateCode)
-        .eq('status', 'active')
-        .maybeSingle();
-      affiliateUserId = affiliate?.user_id || null;
-    }
+    const rawAffiliateCode = req.cookies.get('gf_affiliate_ref')?.value || null;
+    const affiliateCode = rawAffiliateCode && /^[A-Z0-9]{6,16}$/.test(rawAffiliateCode)
+      ? rawAffiliateCode
+      : null;
 
     const record = await createOrderRecord({
       reference_code: referenceCode,
-      affiliate_user_id: affiliateUserId,
-      affiliate_code: affiliateUserId ? affiliateCode : null,
+      affiliate_code: affiliateCode,
       customer_name,
       customer_phone,
       delivery_address,
