@@ -124,10 +124,10 @@ export function Navbar({ settings }: NavbarProps) {
                 </Link>
               )}
               <Link
-                href="/admin"
+                href="/affiliates"
                 className="whitespace-nowrap shrink-0 text-[#5A5853] hover:text-[#173D32] transition-colors py-1 border-b border-transparent hover:border-[#B99A61]"
               >
-                Admin
+                Affiliate Programme
               </Link>
             </nav>
 
@@ -270,11 +270,11 @@ export function Navbar({ settings }: NavbarProps) {
                   Shopping Bag ({hydrated ? itemCount : 0})
                 </Link>
                 <Link
-                  href="/admin"
+                  href="/affiliates"
                   onClick={() => setMobileMenuOpen(false)}
                   className="py-3.5 text-base font-medium text-[#5A5853]"
                 >
-                  Admin Dashboard
+                  Affiliate Programme
                 </Link>
               </nav>
             </div>
