@@ -110,8 +110,8 @@ create policy "Admins manage commissions" on public.affiliate_commissions
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 create policy "Affiliates read own payout requests" on public.affiliate_payout_requests
   for select to authenticated using (auth.uid() = affiliate_user_id or public.is_admin());
-create policy "Affiliates create own payout requests" on public.affiliate_payout_requests
-  for insert to authenticated with check (auth.uid() = affiliate_user_id);
+create policy "Affiliates create own pending payout requests" on public.affiliate_payout_requests
+  for insert to authenticated with check (auth.uid() = affiliate_user_id and status = 'pending');
 create policy "Admins manage payout requests" on public.affiliate_payout_requests
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
