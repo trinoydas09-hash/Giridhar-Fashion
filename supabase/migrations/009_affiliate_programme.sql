@@ -84,6 +84,8 @@ alter table public.affiliate_clicks enable row level security;
 alter table public.affiliate_commissions enable row level security;
 alter table public.affiliate_payout_requests enable row level security;
 
+create policy "Authenticated users read affiliate settings" on public.affiliate_settings
+  for select to authenticated using (true);
 create policy "Admins manage affiliate settings" on public.affiliate_settings
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 create policy "Affiliates create own pending account" on public.affiliate_accounts
