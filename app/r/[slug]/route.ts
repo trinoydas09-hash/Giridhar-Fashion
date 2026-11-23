@@ -11,12 +11,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
 
   const { data: link } = await admin
     .from('affiliate_links')
-    .select('id, destination_url, affiliate_user_id, affiliate_accounts!inner(affiliate_code, status)')
+    .select('id, destination_url, affiliate_user_id')
     .eq('slug', slug)
     .maybeSingle();
-
-  const account = Array.isArray(link?.affiliate_accounts) ? link.affiliate_accounts[0] : link?.affiliate_accounts;
-  if (!link || !account || account.status !== 'active') {
+  if (!link) return NextResponse.redirect(new URL('/affiliates', req.url));
+  const { data: account } = await admin
+    .from('affiliate_accounts')
+    .select('affiliate_code, status')
+    .eq('user_id', link.affiliate_user_id)
+    .maybeSingle();
+  if (!account || account.status !== 'active') {
     return NextResponse.redirect(new URL('/affiliates', req.url));
   }
 
