@@ -26,7 +26,7 @@ export function AdminAffiliatesManager({ token, onNotice }: Props) {
   };
   if (!data) return <div className="border bg-white p-8 text-sm">Loading affiliate accounts…</div>;
   const clickCount = (id:string) => data.clicks.filter((x:any)=>x.affiliate_user_id===id).length;
-  const commissionSum = (id:string,status?:string) => data.commissions.filter((x:any)=>x.affiliate_user_id===id && (!status || x.status===status)).reduce((n:number,x:any)=>n+Number(x.commission_amount),0);
+  const commissionSum = (id:string,status?:string) => data.commissions.filter((x:any)=>x.affiliate_user_id===id && (!status || x.status===status)).reduce((n:number,x:any)=>n+Number(x.commission_amount),0);\n  const payoutSum = (id:string) => data.payouts.filter((x:any)=>x.affiliate_user_id===id && x.status==='paid').reduce((n:number,x:any)=>n+Number(x.amount),0);
   return <div className="space-y-6">
     <section className="border bg-white p-5 space-y-4">
       <div><p className="text-[10px] uppercase tracking-[.18em] text-[#B99A61]">Affiliate Programme Settings</p><h2 className="font-serif text-2xl">Global Commission Rate</h2><p className="text-xs text-[#666]">One rate applies to all active affiliates. Existing commission records keep their saved rate.</p></div>
