@@ -113,12 +113,12 @@ create policy "Affiliates create own payout requests" on public.affiliate_payout
 create policy "Admins manage payout requests" on public.affiliate_payout_requests
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
-grant select on public.affiliate_settings to authenticated;
-grant select, update on public.affiliate_accounts to authenticated;
+grant select, insert, update on public.affiliate_settings to authenticated;
+grant select, insert, update on public.affiliate_accounts to authenticated;
 grant select, insert, update, delete on public.affiliate_links to authenticated;
-grant select on public.affiliate_clicks to authenticated;
-grant select on public.affiliate_commissions to authenticated;
-grant select, insert on public.affiliate_payout_requests to authenticated;
+grant select, insert on public.affiliate_clicks to authenticated;
+grant select, insert on public.affiliate_commissions to authenticated;
+grant select, insert, update on public.affiliate_payout_requests to authenticated;
 
 -- Create a commission only when an admin confirms an attributed WhatsApp order.
 create or replace function public.create_affiliate_commission_for_confirmed_order()
