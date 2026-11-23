@@ -9,7 +9,7 @@ export default async function HomePage() {
   const data = await getPublicStoreData();
 
   return (
-    <div className="storefront-shell min-h-screen w-screen max-w-none flex flex-col bg-[#FAF9F6]">
+    <div className="storefront-shell min-h-screen w-full min-w-0 flex flex-col bg-[#FAF9F6]">
       <Navbar settings={data.settings} />
       <main className="flex-1">
         <HomeSections
