@@ -48,9 +48,8 @@ export function StyleGuideClient({
               GIRIDHAR STYLE GUIDE
             </h1>
             <p className="text-base text-[#F5F0E7]/85 leading-relaxed">
-              Practical menswear architecture curated by our Dhaka stylists—pairing breathable
-              natural fibres, disciplined silhouettes, and earth-toned colour harmony across work,
-              travel, and evening occasions.
+              A considered approach to modern menswear—pairing versatile shirts, balanced silhouettes,
+              and understated colour harmony for everyday, work, travel, and evening occasions.
             </p>
           </div>
 

@@ -22,8 +22,8 @@ interface StoredProviderSecret {
 export const PROVIDER_DEFAULT_MODELS: Record<AIProviderId, { label: string; models: string[]; defaultModel: string }> = {
   gemini: {
     label: 'Google Gemini',
-    defaultModel: 'gemini-4-hydrogen',
-    models: ['gemini-4-hydrogen', 'gemini-3.5-flash', 'gemini-3.5-pro'],
+    defaultModel: 'gemini-3.5-flash-lite',
+    models: ['gemini-3.5-flash-lite'],
   },
   openai: {
     label: 'OpenAI (ChatGPT)',
@@ -205,15 +205,18 @@ export async function getPublicProviderConfigs(): Promise<AIProviderConfigPublic
     const storedKey = decryptSecret(rec.encrypted_api_key);
     const effectiveKey = storedKey || getEnvFallbackKey(id);
     const meta = PROVIDER_DEFAULT_MODELS[id];
+    // Older saved Gemini model IDs in this project are not valid current API model IDs.
+    const selectedModel =
+      id === 'gemini' && !meta.models.includes(rec.selected_model)
+        ? meta.defaultModel
+        : rec.selected_model || meta.defaultModel;
 
     return {
       provider: id,
       label: rec.label || meta.label,
       is_enabled: rec.is_enabled,
-      selected_model: rec.selected_model || meta.defaultModel,
-      available_models: meta.models.includes(rec.selected_model)
-        ? meta.models
-        : [rec.selected_model, ...meta.models].filter(Boolean),
+      selected_model: selectedModel,
+      available_models: meta.models,
       custom_base_url: rec.custom_base_url,
       has_api_key: Boolean(effectiveKey),
       key_preview: storedKey
@@ -243,7 +246,10 @@ export async function resolveServerProviderCredentials(provider: AIProviderId): 
   return {
     provider,
     is_enabled: rec.is_enabled,
-    selected_model: rec.selected_model || PROVIDER_DEFAULT_MODELS[provider].defaultModel,
+    selected_model:
+      provider === 'gemini' && !PROVIDER_DEFAULT_MODELS.gemini.models.includes(rec.selected_model)
+        ? PROVIDER_DEFAULT_MODELS.gemini.defaultModel
+        : rec.selected_model || PROVIDER_DEFAULT_MODELS[provider].defaultModel,
     custom_base_url: rec.custom_base_url,
     api_key: storedKey || envKey,
   };

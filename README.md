@@ -31,6 +31,8 @@ A production-ready Next.js, TypeScript, Tailwind CSS, and Supabase e-commerce pl
 
 ## Local Development
 
+**Node.js 24 or newer is required** (the PDF extraction dependency `unpdf` requires Node.js 24+, and current Google/Supabase SDK dependencies require Node.js 22+).
+
 ```bash
 npm install
 cp .env.example .env.local
@@ -48,6 +50,7 @@ Open `http://localhost:3000`.
    - `supabase/migrations/003_seed_data.sql`
    - `supabase/migrations/004_ai_assistant.sql`
    - `supabase/migrations/005_offers_membership_ai_rag.sql`
+   - `supabase/migrations/006_brand_experience.sql`
 3. Create your admin user in **Authentication -> Users**, then promote that user in SQL Editor:
    ```sql
    update public.profiles

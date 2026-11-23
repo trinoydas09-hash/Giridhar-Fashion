@@ -407,8 +407,9 @@ export function MembershipClient({
                   )
                 ) : (
                   <p className="text-xs text-[#991B1B] bg-[#FEF2F2] border border-[#FECACA] p-3">
-                    Store WhatsApp number is being updated. Contact {settings.store_email} for
-                    membership inquiries.
+                    {settings.store_email
+                      ? `Store WhatsApp number is being updated. Contact ${settings.store_email} for membership inquiries.`
+                      : 'Membership registration will reopen once the official store WhatsApp contact is configured.'}
                   </p>
                 )}
 

@@ -26,7 +26,7 @@ export function AdminAuthGate({ onAuthenticated }: AdminAuthGateProps) {
     claimedEmail: null,
   });
 
-  const [email, setEmail] = useState('admin@giridharfashion.com');
+  const [email, setEmail] = useState('trinoydas10@gmail.com');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);

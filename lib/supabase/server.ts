@@ -45,3 +45,18 @@ export function createSupabaseAdminClient() {
     },
   });
 }
+
+
+// Create a request-scoped Supabase client that carries the already-verified
+// admin user's JWT. This allows RLS policies to authorize admin mutations
+// without exposing or requiring the service-role key in Vercel.
+export function createSupabaseUserClient(accessToken: string) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anonKey || !accessToken) return null;
+
+  return createClient(url, anonKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+    global: { headers: { Authorization: `Bearer ${accessToken}` } },
+  });
+}

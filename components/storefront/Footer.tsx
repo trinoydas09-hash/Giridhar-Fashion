@@ -35,9 +35,11 @@ export function Footer({ settings }: { settings: StoreSettings }) {
               </div>
             </div>
             <p className="text-sm text-[#F5F0E7]/80 max-w-md leading-relaxed">
-              Modern minimal luxury menswear crafted in Bangladesh. Designed with natural fibres, disciplined proportions, and timeless forest-and-stone tailoring.
+              Modern · Minimal · Distinct menswear, designed in Bangladesh.
             </p>
-            <p className="text-xs text-[#F5F0E7]/65">{settings.address}</p>
+            {settings.address && (
+              <p className="text-xs text-[#F5F0E7]/65">{settings.address}</p>
+            )}
           </div>
 
           <div className="md:col-span-2 space-y-3">
@@ -68,26 +70,35 @@ export function Footer({ settings }: { settings: StoreSettings }) {
               )}
               <li><Link href="/cart" className="hover:text-white transition-colors">Shopping Bag</Link></li>
               <li><Link href="/checkout" className="hover:text-white transition-colors">WhatsApp Checkout</Link></li>
+              <li><Link href="/affiliates" className="hover:text-white transition-colors">Affiliate Programme</Link></li>
               <li><Link href="/admin" className="hover:text-white transition-colors">Store Admin</Link></li>
             </ul>
           </div>
 
           <div className="md:col-span-3 space-y-3">
             <h4 className="text-xs font-semibold tracking-[0.15em] uppercase text-[#B99A61]">
-              Dhaka Concierge
+              Bangladesh Concierge
             </h4>
-            <p className="text-sm text-[#F5F0E7]/80 leading-relaxed">{settings.delivery_info}</p>
-            <div className="pt-1 space-y-1 text-sm">
-              <p className="text-[#F5F0E7]">{settings.store_email}</p>
+            {settings.delivery_info && (
+              <p className="text-sm text-[#F5F0E7]/80 leading-relaxed">{settings.delivery_info}</p>
+            )}
+            {settings.store_email && (
+              <p className="text-sm text-[#F5F0E7]">{settings.store_email}</p>
+            )}
+            {(settings.instagram_url || settings.facebook_url) && (
               <div className="flex items-center gap-4 pt-2 text-xs tracking-wider uppercase text-[#B99A61]">
-                <a href={settings.instagram_url} target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                  Instagram
-                </a>
-                <a href={settings.facebook_url} target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                  Facebook
-                </a>
+                {settings.instagram_url && (
+                  <a href={settings.instagram_url} target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                    Instagram
+                  </a>
+                )}
+                {settings.facebook_url && (
+                  <a href={settings.facebook_url} target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                    Facebook
+                  </a>
+                )}
               </div>
-            </div>
+            )}
           </div>
         </div>
 

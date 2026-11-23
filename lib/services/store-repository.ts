@@ -205,10 +205,13 @@ function recordActivity(snapshot: StoreSnapshot, action: string, entity_type: st
   snapshot.activity = [entry, ...snapshot.activity].slice(0, 30);
 }
 
-async function loadSupabaseSnapshot(includeDrafts: boolean): Promise<StoreSnapshot> {
-  const client = includeDrafts
+async function loadSupabaseSnapshot(
+  includeDrafts: boolean,
+  clientOverride?: NonNullable<ReturnType<typeof createSupabaseAdminClient>>
+): Promise<StoreSnapshot> {
+  const client = clientOverride ?? (includeDrafts
     ? createSupabaseAdminClient() ?? (await createSupabaseServerClient())
-    : await createSupabaseServerClient();
+    : await createSupabaseServerClient());
 
   if (!client) {
     return loadLocalStore();
@@ -492,12 +495,14 @@ export async function getPublicProductBySlug(slug: string): Promise<{
   };
 }
 
-export async function getAdminStoreSnapshot(): Promise<StoreSnapshot> {
+export async function getAdminStoreSnapshot(
+  clientOverride?: NonNullable<ReturnType<typeof createSupabaseAdminClient>>
+): Promise<StoreSnapshot> {
   const aiProviders = await getPublicProviderConfigs();
   const aiSettings = await getAIAssistantSettings();
 
   if (isSupabaseConfigured()) {
-    const snap = await loadSupabaseSnapshot(true);
+    const snap = await loadSupabaseSnapshot(true, clientOverride);
     return {
       ...snap,
       ai_settings: snap.ai_settings || aiSettings,
@@ -523,16 +528,17 @@ export async function getAdminStoreSnapshot(): Promise<StoreSnapshot> {
 // ============================================================================
 
 export async function upsertProduct(
-  input: Omit<Product, 'id' | 'created_at' | 'updated_at'> & { id?: string }
+  input: Omit<Product, 'id' | 'created_at' | 'updated_at'> & { id?: string },
+  clientOverride?: NonNullable<ReturnType<typeof createSupabaseAdminClient>>
 ): Promise<Product> {
   const now = new Date().toISOString();
   const productId = input.id || `prod-${crypto.randomUUID().slice(0, 8)}`;
 
   if (isSupabaseConfigured()) {
-    const admin = createSupabaseAdminClient();
-    if (!admin) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for admin mutations.');
+    const admin = clientOverride ?? createSupabaseAdminClient();
+    if (!admin) throw new Error('Admin database client unavailable. Please sign in again and retry.');
 
-    const { error: prodErr } = await admin.from('products').upsert({
+    const { data: productRow, error: prodErr } = await admin.from('products').upsert({
       id: productId,
       name: input.name,
       slug: input.slug,
@@ -547,43 +553,48 @@ export async function upsertProduct(
       is_new_arrival: input.is_new_arrival,
       specifications: input.specifications,
       updated_at: now,
-    });
-    if (prodErr) throw new Error(prodErr.message);
+    }).select().single();
+    if (prodErr || !productRow) throw new Error(prodErr?.message || 'Product could not be saved.');
 
-    await admin.from('product_images').delete().eq('product_id', productId);
-    if (input.images.length > 0) {
-      const { error: imgErr } = await admin.from('product_images').insert(
-        input.images.map((img, i) => ({
-          id: img.id || `img-${crypto.randomUUID().slice(0, 8)}`,
-          product_id: productId,
-          url: img.url,
-          alt_text: img.alt_text || input.name,
-          display_order: i + 1,
-          is_primary: i === 0 ? true : img.is_primary,
-        }))
-      );
+    const { error: imageDeleteErr } = await admin.from('product_images').delete().eq('product_id', productId);
+    if (imageDeleteErr) throw new Error(imageDeleteErr.message);
+    const imageRows = input.images.map((img, i) => ({
+      id: !img.id || img.id.startsWith('img-new') ? `img-${crypto.randomUUID().slice(0, 8)}` : img.id,
+      product_id: productId,
+      url: img.url,
+      alt_text: img.alt_text || input.name,
+      display_order: i + 1,
+      is_primary: i === 0 ? true : img.is_primary,
+    }));
+    if (imageRows.length > 0) {
+      const { error: imgErr } = await admin.from('product_images').insert(imageRows);
       if (imgErr) throw new Error(imgErr.message);
     }
 
-    await admin.from('product_variants').delete().eq('product_id', productId);
-    if (input.variants.length > 0) {
-      const { error: varErr } = await admin.from('product_variants').insert(
-        input.variants.map((v) => ({
-          id: v.id || `var-${crypto.randomUUID().slice(0, 8)}`,
-          product_id: productId,
-          colour: v.colour,
-          colour_hex: v.colour_hex,
-          size: v.size,
-          sku: v.sku,
-          stock_status: v.stock_status,
-          stock_quantity: v.stock_quantity,
-        }))
-      );
+    const { error: variantDeleteErr } = await admin.from('product_variants').delete().eq('product_id', productId);
+    if (variantDeleteErr) throw new Error(variantDeleteErr.message);
+    const variantRows = input.variants.map((v) => ({
+      id: !v.id || v.id.startsWith('var-new') ? `var-${crypto.randomUUID().slice(0, 8)}` : v.id,
+      product_id: productId,
+      colour: v.colour,
+      colour_hex: v.colour_hex,
+      size: v.size,
+      sku: v.sku,
+      stock_status: v.stock_status,
+      stock_quantity: v.stock_quantity,
+    }));
+    if (variantRows.length > 0) {
+      const { error: varErr } = await admin.from('product_variants').insert(variantRows);
       if (varErr) throw new Error(varErr.message);
     }
 
-    const snap = await loadSupabaseSnapshot(true);
-    return snap.products.find((p) => p.id === productId)!;
+    return {
+      ...(productRow as Product),
+      category: undefined,
+      specifications: Array.isArray(productRow.specifications) ? productRow.specifications : [],
+      images: imageRows,
+      variants: variantRows,
+    } as Product;
   }
 
   const snap = loadLocalStore();
@@ -620,10 +631,13 @@ export async function upsertProduct(
   return saved;
 }
 
-export async function deleteProduct(id: string): Promise<void> {
+export async function deleteProduct(
+  id: string,
+  clientOverride?: NonNullable<ReturnType<typeof createSupabaseAdminClient>>
+): Promise<void> {
   if (isSupabaseConfigured()) {
-    const admin = createSupabaseAdminClient();
-    if (!admin) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required.');
+    const admin = clientOverride ?? createSupabaseAdminClient();
+    if (!admin) throw new Error('Admin database client unavailable. Please sign in again and retry.');
     const { error } = await admin.from('products').delete().eq('id', id);
     if (error) throw new Error(error.message);
     return;
@@ -989,6 +1003,7 @@ function buildJoinedMembershipViews(
 export async function listMembershipRequestViews(): Promise<MembershipRequestView[]> {
   if (isSupabaseConfigured()) {
     const admin = createSupabaseAdminClient();
+    if (!admin) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for membership administration.');
     if (admin) {
       try {
         const [{ data: reqRows }, { data: recRows }, { data: codeRows }] = await Promise.all([
@@ -1040,6 +1055,7 @@ export async function createMembershipRequest(input: {
 
   if (isSupabaseConfigured()) {
     const admin = createSupabaseAdminClient();
+    if (!admin) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required to save membership requests.');
     if (admin) {
       try {
         const { data: existingCodes } = await admin.from('membership_codes').select('code');
@@ -1315,6 +1331,7 @@ export async function adminProcessMembershipRequest(input: {
 
   if (isSupabaseConfigured()) {
     const admin = createSupabaseAdminClient();
+    if (!admin) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required to process membership requests.');
     if (admin) {
       const { data: reqRow, error: reqErr } = await admin
         .from('membership_requests')
@@ -1443,6 +1460,7 @@ export async function validateMembershipCode(rawCode: string): Promise<Membershi
 
   if (isSupabaseConfigured()) {
     const admin = createSupabaseAdminClient();
+    if (!admin) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required to validate membership codes.');
     if (admin) {
       try {
         const { data: codeRow } = await admin
@@ -1825,8 +1843,10 @@ export async function createOrderRecord(order: Omit<OrderRecord, 'id' | 'created
         .insert({ ...order, id, created_at: now })
         .select()
         .single();
-      if (!error && data) return data as OrderRecord;
+      if (error || !data) throw new Error(error?.message || 'Order request could not be saved.');
+      return data as OrderRecord;
     }
+    throw new Error('Order database is unavailable. Please try again.');
   }
 
   const snap = loadLocalStore();
@@ -1835,6 +1855,69 @@ export async function createOrderRecord(order: Omit<OrderRecord, 'id' | 'created
   recordActivity(snap, 'WhatsApp order initiated', 'order', `${saved.reference_code} · ${saved.customer_name}`);
   saveLocalStore(snap);
   return saved;
+}
+
+export async function listAdminOrders(
+  clientOverride?: NonNullable<ReturnType<typeof createSupabaseAdminClient>>
+): Promise<OrderRecord[]> {
+  if (isSupabaseConfigured()) {
+    const client = clientOverride ?? createSupabaseAdminClient() ?? (await createSupabaseServerClient());
+    if (!client) throw new Error('Admin database client unavailable.');
+    const { data, error } = await client
+      .from('order_records')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(500);
+    if (error) throw new Error(error.message);
+    return (data || []) as OrderRecord[];
+  }
+  return loadLocalStore().orders || [];
+}
+
+export async function adminReviewOrder(input: {
+  orderId: string;
+  action: 'accept' | 'reject';
+  adminEmail: string;
+  clientOverride?: NonNullable<ReturnType<typeof createSupabaseAdminClient>>;
+}): Promise<OrderRecord> {
+  const now = new Date().toISOString();
+  const nextStatus = input.action === 'accept' ? 'confirmed' : 'rejected';
+  if (isSupabaseConfigured()) {
+    const client = input.clientOverride ?? createSupabaseAdminClient() ?? (await createSupabaseServerClient());
+    if (!client) throw new Error('Admin database client unavailable.');
+    const { data, error } = await client
+      .from('order_records')
+      .update({
+        status: nextStatus,
+        payment_status: input.action === 'accept' ? 'paid' : 'unpaid',
+        reviewed_by: input.adminEmail,
+        reviewed_at: now,
+      })
+      .eq('id', input.orderId)
+      .eq('status', 'pending_whatsapp')
+      .select('*')
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error('This order has already been reviewed or no longer exists.');
+    return data as OrderRecord;
+  }
+
+  const snap = loadLocalStore();
+  const index = snap.orders.findIndex((order) => order.id === input.orderId);
+  if (index < 0) throw new Error('Order not found.');
+  const current = snap.orders[index];
+  if (current.status !== 'pending_whatsapp') throw new Error('This order has already been reviewed.');
+  const updated: OrderRecord = {
+    ...current,
+    status: nextStatus,
+    payment_status: input.action === 'accept' ? 'paid' : 'unpaid',
+    reviewed_by: input.adminEmail,
+    reviewed_at: now,
+  };
+  snap.orders[index] = updated;
+  recordActivity(snap, input.action === 'accept' ? 'Accepted WhatsApp order' : 'Rejected WhatsApp order', 'order', updated.reference_code);
+  saveLocalStore(snap);
+  return updated;
 }
 
 export async function subscribeNewsletter(email: string): Promise<{ ok: boolean; message: string }> {

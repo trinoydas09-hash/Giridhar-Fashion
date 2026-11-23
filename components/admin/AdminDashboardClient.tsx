@@ -17,6 +17,7 @@ import {
   Package,
   Plus,
   Settings as SettingsIcon,
+  ShoppingCart,
   Sparkles,
   Tag,
   Trash2,
@@ -34,9 +35,11 @@ import {
   StoreSnapshot,
 } from '@/types/store';
 import { AdminAuthGate } from './AdminAuthGate';
+import { AdminAffiliatesManager } from './AdminAffiliatesManager';
 import { AdminBrandExperienceManager } from './AdminBrandExperienceManager';
 import { AdminMembershipManager } from './AdminMembershipManager';
 import { AdminOffersManager } from './AdminOffersManager';
+import { AdminOrdersManager } from './AdminOrdersManager';
 import { AdminProductEditor } from './AdminProductEditor';
 import { AdminUnifiedAIPanel } from './AdminUnifiedAIPanel';
 
@@ -47,6 +50,8 @@ type AdminTab =
   | 'homepage'
   | 'brand_experience'
   | 'offers'
+  | 'orders'
+  | 'affiliates'
   | 'promotions'
   | 'membership'
   | 'settings'
@@ -60,6 +65,7 @@ export function AdminDashboardClient() {
   } | null>(null);
 
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
+  const lastPendingOrderCount = React.useRef<number | null>(null);
   const [snapshot, setSnapshot] = useState<StoreSnapshot | null>(null);
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
@@ -149,6 +155,9 @@ export function AdminDashboardClient() {
           flashNotice('err', data.error || 'Failed to load admin snapshot.');
           return;
         }
+        lastPendingOrderCount.current = (data.orders || []).filter(
+          (order: { status: string }) => order.status === 'pending_whatsapp'
+        ).length;
         setSnapshot(data);
         setSectionsDraft(data.sections || []);
         setSettingsDraft(data.settings || null);
@@ -161,6 +170,38 @@ export function AdminDashboardClient() {
       });
     return () => {
       active = false;
+    };
+  }, [session]);
+
+  // Refresh order counts in the admin sidebar while the dashboard is open.
+  useEffect(() => {
+    if (!session) return;
+    let active = true;
+    const pollOrders = async () => {
+      try {
+        const res = await fetch('/api/admin/snapshot', {
+          headers: { Authorization: `Bearer ${session.token}` },
+          cache: 'no-store',
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!active) return;
+        const pendingCount = (data.orders || []).filter(
+          (order: { status: string }) => order.status === 'pending_whatsapp'
+        ).length;
+        if (lastPendingOrderCount.current !== null && pendingCount > lastPendingOrderCount.current) {
+          flashNotice('ok', `${pendingCount - lastPendingOrderCount.current} new WhatsApp order request(s) received.`);
+        }
+        lastPendingOrderCount.current = pendingCount;
+        setSnapshot(data);
+      } catch {
+        // Keep the existing dashboard state if a background refresh fails.
+      }
+    };
+    const timer = window.setInterval(() => void pollOrders(), 30000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
     };
   }, [session]);
 
@@ -441,6 +482,8 @@ export function AdminDashboardClient() {
     { key: 'homepage', label: 'Homepage Manager', icon: LayoutTemplate },
     { key: 'brand_experience', label: 'Brand Experience', icon: Sparkles },
     { key: 'offers', label: 'Offers & Combos', icon: Tag },
+    { key: 'orders', label: 'Orders & Revenue', icon: ShoppingCart },
+    { key: 'affiliates', label: 'Affiliates', icon: Award },
     { key: 'promotions', label: 'Campaigns', icon: Megaphone },
     { key: 'membership', label: 'Membership', icon: Award },
     { key: 'settings', label: 'Store Settings', icon: SettingsIcon },
@@ -476,6 +519,11 @@ export function AdminDashboardClient() {
                 >
                   <Icon className="w-4 h-4 shrink-0" />
                   <span>{item.label}</span>
+                  {item.key === 'orders' && (snapshot?.orders || []).filter((order) => order.status === 'pending_whatsapp').length > 0 && (
+                    <span className="ml-auto min-w-5 h-5 px-1 rounded-full bg-[#B99A61] text-[#173D32] text-[10px] font-bold flex items-center justify-center">
+                      {(snapshot?.orders || []).filter((order) => order.status === 'pending_whatsapp').length}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -1301,7 +1349,7 @@ export function AdminDashboardClient() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-[#E4DDD0] pt-5">
                   <div>
-                    <label className="block text-xs font-semibold uppercase mb-1">Dhaka Delivery (৳)</label>
+                    <label className="block text-xs font-semibold uppercase mb-1">Chattogram Delivery (৳)</label>
                     <input
                       type="number"
                       value={settingsDraft.delivery_charge_dhaka}
@@ -1312,7 +1360,7 @@ export function AdminDashboardClient() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold uppercase mb-1">Outside Dhaka (৳)</label>
+                    <label className="block text-xs font-semibold uppercase mb-1">Outside Chattogram (৳)</label>
                     <input
                       type="number"
                       value={settingsDraft.delivery_charge_outside}
@@ -1323,7 +1371,7 @@ export function AdminDashboardClient() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold uppercase mb-1">Free Delivery Threshold (৳)</label>
+                    <label className="block text-xs font-semibold uppercase mb-1">Free Delivery Minimum Items</label>
                     <input
                       type="number"
                       value={settingsDraft.free_delivery_threshold}
@@ -1408,6 +1456,20 @@ export function AdminDashboardClient() {
                 onRefresh={loadSnapshot}
                 onNotice={flashNotice}
               />
+            )}
+
+            {/* ORDERS & REVENUE TAB */}
+            {activeTab === 'orders' && snapshot && (
+              <AdminOrdersManager
+                token={session.token}
+                currencySymbol={snapshot.settings.currency_symbol}
+                onNotice={flashNotice}
+              />
+            )}
+
+            {/* AFFILIATE PROGRAMME TAB */}
+            {activeTab === 'affiliates' && snapshot && (
+              <AdminAffiliatesManager token={session.token} onNotice={flashNotice} />
             )}
 
             {/* PREMIUM MEMBERSHIP TAB */}

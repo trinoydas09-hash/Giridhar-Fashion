@@ -1,24 +1,17 @@
-import type { Metadata } from 'next';
-import { Cormorant_Garamond, Plus_Jakarta_Sans } from 'next/font/google';
+import type { Metadata, Viewport } from 'next';
 import { CartProvider } from '@/components/providers/CartProvider';
 import { GiridharAiWidget } from '@/components/storefront/GiridharAiWidget';
 import './globals.css';
 
-const cormorant = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
-  variable: '--font-cormorant',
-  display: 'swap',
-});
+const appUrl = process.env.APP_URL?.startsWith('http')
+  ? process.env.APP_URL
+  : 'https://giridhar-fashion.vercel.app';
 
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-jakarta',
-  display: 'swap',
-});
-
-const appUrl = process.env.APP_URL?.startsWith('http') ? process.env.APP_URL : 'https://giridharfashion.com';
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
@@ -27,11 +20,11 @@ export const metadata: Metadata = {
     template: '%s | GIRIDHAR FASHION',
   },
   description:
-    'Modern, minimal, distinct luxury menswear crafted in Bangladesh. Shop tailored shirts, heavyweight hoodies, cable knit sweaters, and trousers.',
+    'Modern, minimal, distinct menswear crafted in Bangladesh. Explore the GIRIDHAR FASHION collection.',
   openGraph: {
     title: 'GIRIDHAR FASHION — Modern Minimal Luxury Menswear',
     description:
-      'Modern, minimal, distinct luxury menswear crafted in Bangladesh. Shop tailored shirts, heavyweight hoodies, cable knit sweaters, and trousers.',
+      'Modern, minimal, distinct menswear crafted in Bangladesh.',
     type: 'website',
     siteName: 'GIRIDHAR FASHION',
     images: ['/assets/aistudio/image_32af7105.png'],
@@ -39,8 +32,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'GIRIDHAR FASHION — Modern Minimal Luxury Menswear',
-    description:
-      'Modern, minimal, distinct luxury menswear crafted in Bangladesh.',
+    description: 'Modern, minimal, distinct menswear crafted in Bangladesh.',
   },
 };
 
@@ -51,18 +43,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     name: 'GIRIDHAR FASHION',
     description: 'Modern Minimal Luxury Menswear in Bangladesh.',
     url: appUrl,
-    priceRange: '৳1,190 - ৳3,500',
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: 'House 24, Road 11, Banani',
-      addressLocality: 'Dhaka',
-      postalCode: '1213',
-      addressCountry: 'BD',
-    },
   };
 
   return (
-    <html lang="en" className={`${cormorant.variable} ${jakarta.variable}`}>
+    <html lang="en">
       <body suppressHydrationWarning className="min-h-screen bg-[#FAF9F6] text-[#242424] antialiased">
         <script
           type="application/ld+json"

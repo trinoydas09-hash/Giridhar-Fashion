@@ -94,7 +94,7 @@ export function AdminUnifiedAIPanel({
       const map: Record<AIProviderId, ProviderDraftState> = {
         gemini: {
           is_enabled: true,
-          selected_model: 'gemini-4-hydrogen',
+          selected_model: 'gemini-3.5-flash-lite',
           custom_base_url: '',
           api_key_input: '',
         },

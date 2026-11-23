@@ -267,7 +267,7 @@ export function CheckoutClient({
             Thank You — WhatsApp Inquiry Recorded
           </h1>
           <p className="text-sm text-[#5A5853] leading-relaxed">
-            Our Dhaka concierge team will verify stock and confirm delivery timing directly in your WhatsApp thread.
+            Our GIRIDHAR FASHION team will verify stock and confirm delivery timing directly in your WhatsApp thread.
           </p>
           <div className="pt-3 flex flex-wrap justify-center gap-3">
             <Link
