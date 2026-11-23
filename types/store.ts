@@ -355,6 +355,9 @@ export interface OrderRecord {
   free_bonus_items?: string[];
   membership_code?: string | null;
   membership_discount?: number;
+  affiliate_user_id?: string | null;
+  affiliate_code?: string | null;
+  affiliate_commission?: number | null;
   total_amount: number;
   channel: 'whatsapp_cart' | 'whatsapp_buy_now';
   status: 'pending_whatsapp' | 'confirmed' | 'rejected' | 'dispatched' | 'completed';
