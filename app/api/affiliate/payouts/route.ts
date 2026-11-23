@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   if (!Number.isFinite(amount) || amount <= 0) return NextResponse.json({ error: 'Enter a valid payout amount.' }, { status: 400 });
   const [commissions, payouts, settings] = await Promise.all([
     client.from('affiliate_commissions').select('commission_amount').eq('affiliate_user_id', user.id).eq('status', 'approved'),
-    client.from('affiliate_payout_requests').select('amount').eq('affiliate_user_id', user.id).in('status', ['pending','processing']),
+    client.from('affiliate_payout_requests').select('amount').eq('affiliate_user_id', user.id).in('status', ['pending','processing','paid']),
     client.from('affiliate_settings').select('minimum_payout').eq('id', 'global').maybeSingle(),
   ]);
   if (commissions.error || payouts.error) return NextResponse.json({ error: 'Unable to verify your balance.' }, { status: 500 });
