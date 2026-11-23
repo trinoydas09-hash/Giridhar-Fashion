@@ -18,12 +18,13 @@ export async function GET(req: NextRequest) {
   if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
   const { data: account } = await auth.client.from('affiliate_accounts').select('*').eq('user_id', auth.user.id).maybeSingle();
   if (!account) return NextResponse.json({ error: 'Affiliate account not found.' }, { status: 404 });
-  const [links, clicks, commissions, payouts, settings] = await Promise.all([
+  const [links, clicks, commissions, payouts, settings, storeSettings] = await Promise.all([
     auth.client.from('affiliate_links').select('*').eq('affiliate_user_id', auth.user.id).order('created_at', { ascending: false }),
     auth.client.from('affiliate_clicks').select('id', { count: 'exact', head: true }).eq('affiliate_user_id', auth.user.id),
     auth.client.from('affiliate_commissions').select('*').eq('affiliate_user_id', auth.user.id).order('created_at', { ascending: false }),
     auth.client.from('affiliate_payout_requests').select('*').eq('affiliate_user_id', auth.user.id).order('requested_at', { ascending: false }),
     auth.client.from('affiliate_settings').select('minimum_payout').eq('id', 'global').maybeSingle(),
+    auth.client.from('store_settings').select('whatsapp_number').limit(1).maybeSingle(),
   ]);
   if (links.error || clicks.error || commissions.error || payouts.error) {
     return NextResponse.json({ error: 'Unable to load affiliate dashboard.' }, { status: 500 });
@@ -31,11 +32,12 @@ export async function GET(req: NextRequest) {
   const commissionRows = commissions.data || [];
   const payoutRows = payouts.data || [];
   const approved = commissionRows.filter((c) => c.status === 'approved').reduce((n, c) => n + Number(c.commission_amount), 0);
-  const paid = commissionRows.filter((c) => c.status === 'paid').reduce((n, c) => n + Number(c.commission_amount), 0);
+  const paid = payoutRows.filter((p) => p.status === 'paid').reduce((n, p) => n + Number(p.amount), 0);
   const reserved = payoutRows.filter((p) => ['pending', 'processing'].includes(p.status)).reduce((n, p) => n + Number(p.amount), 0);
   return NextResponse.json({
     account, links: links.data || [], clicks: clicks.count || 0, commissions: commissionRows, payouts: payoutRows,
-    balance: Math.max(0, approved - reserved), paid,
+    balance: Math.max(0, approved - reserved - paid), paid,
+    whatsappNumber: storeSettings.data?.whatsapp_number || null,
     minimumPayout: Number(settings.data?.minimum_payout || 500),
   });
 }
