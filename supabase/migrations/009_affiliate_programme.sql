@@ -130,20 +130,25 @@ set search_path = public
 as $$
 declare
   v_rate numeric(5,2);
+  v_affiliate_user_id uuid;
 begin
-  if new.status = 'confirmed'
-     and old.status = 'pending_whatsapp'
-     and new.affiliate_user_id is not null then
-    select global_commission_rate into v_rate
-    from public.affiliate_settings where id = 'global';
-    v_rate := coalesce(v_rate, 10);
-    insert into public.affiliate_commissions (
-      affiliate_user_id, order_id, order_reference, sale_amount,
-      commission_rate, commission_amount, status
-    ) values (
-      new.affiliate_user_id, new.id, new.reference_code, new.total_amount,
-      v_rate, round(new.total_amount * v_rate / 100, 2), 'approved'
-    ) on conflict (order_id) do nothing;
+  if new.status = 'confirmed' and old.status = 'pending_whatsapp' and new.affiliate_code is not null then
+    select user_id into v_affiliate_user_id
+    from public.affiliate_accounts
+    where affiliate_code = new.affiliate_code and status = 'active'
+    limit 1;
+    if v_affiliate_user_id is not null then
+      select global_commission_rate into v_rate
+      from public.affiliate_settings where id = 'global';
+      v_rate := coalesce(v_rate, 10);
+      insert into public.affiliate_commissions (
+        affiliate_user_id, order_id, order_reference, sale_amount,
+        commission_rate, commission_amount, status
+      ) values (
+        v_affiliate_user_id, new.id, new.reference_code, new.total_amount,
+        v_rate, round(new.total_amount * v_rate / 100, 2), 'approved'
+      ) on conflict (order_id) do nothing;
+    end if;
   end if;
   return new;
 end;
