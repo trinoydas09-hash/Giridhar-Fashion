@@ -9,8 +9,10 @@ async function authorize(req: NextRequest) {
   const auth = await requireAdminRequest(req);
   if (!auth.authorized) return { response: NextResponse.json({ error: auth.error }, { status: auth.status }) };
   const token = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim();
-  const client = token ? createSupabaseUserClient(token) : null;
-  if (!client) return { response: NextResponse.json({ error: 'Admin database session unavailable.' }, { status: 401 }) };
+  // Authorization is verified above; use the server-only service client for admin data
+  // so affiliate RLS policies cannot accidentally hide rows from the dashboard.
+  const client = createSupabaseAdminClient() ?? (token ? createSupabaseUserClient(token) : null);
+  if (!client) return { response: NextResponse.json({ error: 'Admin database session unavailable. Check Supabase server configuration.' }, { status: 503 }) };
   return { auth, client };
 }
 
