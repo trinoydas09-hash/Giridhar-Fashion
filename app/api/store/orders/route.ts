@@ -213,7 +213,7 @@ export async function POST(req: NextRequest) {
 
     const record = await createOrderRecord({
       reference_code: referenceCode,
-      affiliate_code: affiliateCode,
+      ...(affiliateCode ? { affiliate_code: affiliateCode } : {}),
       customer_name,
       customer_phone,
       delivery_address,
