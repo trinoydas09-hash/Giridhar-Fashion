@@ -4,17 +4,14 @@ import { getPublicStoreData } from '@/lib/services/store-repository';
 export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.APP_URL?.startsWith('http')
-    ? process.env.APP_URL.replace(/\/$/, '')
-    : 'https://giridharfashion.com';
+  // Use the public custom domain so sitemap URLs never point to a Vercel deployment URL.
+  const baseUrl = 'https://giridharfashion.store';
 
   const store = await getPublicStoreData();
 
   const staticEntries: MetadataRoute.Sitemap = [
     { url: `${baseUrl}/`, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
     { url: `${baseUrl}/shop`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/cart`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.5 },
-    { url: `${baseUrl}/checkout`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.5 },
   ];
 
   const productEntries: MetadataRoute.Sitemap = store.products.map((p) => ({
