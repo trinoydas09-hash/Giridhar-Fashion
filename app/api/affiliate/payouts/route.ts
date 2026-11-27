@@ -5,18 +5,6 @@ import { checkSlidingRateLimit } from '@/lib/security/rate-limit';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-  const clientIp = req.headers.get('x-real-ip')
-    || req.headers.get('x-vercel-forwarded-for')?.split(',')[0]?.trim()
-    || req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || 'unknown';
-  const limit = checkSlidingRateLimit(`affiliate-payout:${clientIp.slice(0, 100)}`, 3, 60 * 60_000);
-  if (!limit.allowed) {
-    return NextResponse.json(
-      { error: 'Too many payout requests. Please try again later.' },
-      { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } }
-    );
-  }
-
   // Strip the HTTP Bearer scheme before passing the JWT to Supabase.
   const token = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim();
   const client = token ? createSupabaseUserClient(token) : null;
@@ -25,6 +13,15 @@ export async function POST(req: NextRequest) {
   const { data: { user }, error: authError } = await client.auth.getUser(token!);
   if (authError || !user) {
     return NextResponse.json({ error: 'Please sign in again.' }, { status: 401 });
+  }
+
+  // Throttle per authenticated affiliate, never by shared public IP.
+  const limit = checkSlidingRateLimit(`affiliate-payout:${user.id}`, 3, 60 * 60_000);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: 'You have reached the payout request limit. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } }
+    );
   }
 
   const body = await req.json().catch(() => ({}));
