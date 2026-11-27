@@ -1,5 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseAdminClient, createSupabaseUserClient } from '@/lib/supabase/server';
+import { checkSlidingRateLimit } from '@/lib/security/rate-limit';
+
+function getRateLimitClientKey(req: NextRequest): string {
+  // Prefer platform-provided client IP headers. The fallback groups unknown clients
+  // together rather than silently disabling protection.
+  const ip = req.headers.get('x-real-ip')
+    || req.headers.get('x-vercel-forwarded-for')?.split(',')[0]?.trim()
+    || req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || 'unknown';
+  return ip.slice(0, 100);
+}
+
 
 export const dynamic = 'force-dynamic';
 
@@ -51,6 +63,13 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const limit = checkSlidingRateLimit(`affiliate-apply:${getRateLimitClientKey(req)}`, 3, 15 * 60_000);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many affiliate applications. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } }
+    );
+  }
   const auth = await getAffiliate(req);
   if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
   const body = await req.json().catch(() => ({}));
