@@ -8,18 +8,6 @@ import {
   validateMembershipCode,
 } from '@/lib/services/store-repository';
 import { generateWhatsAppCheckoutUrl, validateCustomerPhone } from '@/lib/whatsapp/checkout';
-import { checkSlidingRateLimit } from '@/lib/security/rate-limit';
-
-function getRateLimitClientKey(req: NextRequest): string {
-  // Prefer platform-provided client IP headers. The fallback groups unknown clients
-  // together rather than silently disabling protection.
-  const ip = req.headers.get('x-real-ip')
-    || req.headers.get('x-vercel-forwarded-for')?.split(',')[0]?.trim()
-    || req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || 'unknown';
-  return ip.slice(0, 100);
-}
-
 
 const orderItemSchema = z.object({
   item_type: z.enum(['product', 'surprise_box']).optional().default('product'),
@@ -44,14 +32,6 @@ const orderSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const limit = checkSlidingRateLimit(`public-order:${getRateLimitClientKey(req)}`, 5, 10 * 60_000);
-  if (!limit.allowed) {
-    return NextResponse.json(
-      { error: 'Too many order attempts. Please try again later.' },
-      { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } }
-    );
-  }
-
   try {
     const body = await req.json();
     const parsed = orderSchema.safeParse(body);
