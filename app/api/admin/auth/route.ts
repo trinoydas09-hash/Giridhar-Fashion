@@ -85,8 +85,9 @@ export async function POST(req: NextRequest) {
 
     const token = issueAdminSessionToken(info.claimedEmail || email);
     return NextResponse.json({ token, email: info.claimedEmail || email }, { status: 200 });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Authentication error.';
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    // Avoid exposing internal auth/provider details to public clients.
+    console.error('[admin/auth] Authentication request failed.');
+    return NextResponse.json({ error: 'Authentication is temporarily unavailable. Please try again.' }, { status: 500 });
   }
 }
