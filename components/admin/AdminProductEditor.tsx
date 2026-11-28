@@ -78,6 +78,7 @@ export function AdminProductEditor({
   const [batchHex, setBatchHex] = useState('#1D1D1D');
   const [batchSizes, setBatchSizes] = useState('S, M, L, XL');
   const [batchQty, setBatchQty] = useState('10');
+  const [uploadColour, setUploadColour] = useState(initialProduct?.variants[0]?.colour || '');
 
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -128,7 +129,7 @@ export function AdminProductEditor({
           product_id: initialProduct?.id || '',
           url: data.url,
           alt_text: name || 'Product photo',
-          colour: variants[0]?.colour || null,
+          colour: uploadColour || null,
           display_order: prev.length + 1,
           is_primary: prev.length === 0,
         },
@@ -369,13 +370,28 @@ export function AdminProductEditor({
 
           {/* Images */}
           <div className="space-y-3 border-t border-[#E4DDD0] pt-5">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className="font-serif text-lg font-semibold text-[#242424]">Product Images</h3>
-              <label className="inline-flex items-center gap-2 px-3.5 py-2 bg-[#173D32] text-[#FAF9F6] text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-[#102B23]">
-                <Upload className="w-3.5 h-3.5" />
-                <span>{uploading ? 'Uploading...' : 'Upload Image'}</span>
-                <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleImageUpload} />
-              </label>
+              <div className="flex flex-wrap items-center gap-2">
+                <label className="text-[11px] text-[#5A5853]">
+                  Upload colour
+                  <select
+                    value={uploadColour}
+                    onChange={(e) => setUploadColour(e.target.value)}
+                    className="ml-2 border border-[#D8CFC0] bg-white px-2 py-2 text-xs text-[#242424]"
+                  >
+                    <option value="">Unassigned</option>
+                    {[...new Set(variants.map((variant) => variant.colour).filter(Boolean))].map((colour) => (
+                      <option key={colour} value={colour}>{colour}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="inline-flex items-center gap-2 px-3.5 py-2 bg-[#173D32] text-[#FAF9F6] text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-[#102B23]">
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>{uploading ? 'Uploading...' : 'Upload Image'}</span>
+                  <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleImageUpload} />
+                </label>
+              </div>
             </div>
 
             <div className="space-y-2">

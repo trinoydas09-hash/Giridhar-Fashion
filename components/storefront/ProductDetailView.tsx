@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -48,6 +48,7 @@ export function ProductDetailView({
   const { addItem, setDirectBuyNow } = useCart();
 
   const [activeImageIdx, setActiveImageIdx] = useState(0);
+  const touchStartX = useRef<number | null>(null);
   const [selectedColour, setSelectedColour] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
@@ -109,10 +110,27 @@ export function ProductDetailView({
     return Boolean(v && v.stock_status !== 'out_of_stock' && v.stock_quantity > 0);
   };
 
-  const colourImages = selectedColour
+  const displayedImages = selectedColour
     ? product.images.filter((image) => image.colour?.toLowerCase() === selectedColour.toLowerCase())
-    : [];
-  const displayedImages = selectedColour && colourImages.length > 0 ? colourImages : product.images;
+    : product.images;
+
+  const handleGalleryTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    touchStartX.current = event.changedTouches[0]?.clientX ?? null;
+  };
+
+  const handleGalleryTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    const startX = touchStartX.current;
+    const endX = event.changedTouches[0]?.clientX;
+    touchStartX.current = null;
+    if (startX === null || endX === undefined || displayedImages.length < 2) return;
+    const deltaX = endX - startX;
+    if (Math.abs(deltaX) < 40) return;
+    setActiveImageIdx((current) =>
+      deltaX < 0
+        ? (current + 1) % displayedImages.length
+        : (current - 1 + displayedImages.length) % displayedImages.length
+    );
+  };
 
   const maxStock = activeVariant ? Math.max(0, activeVariant.stock_quantity) : 10;
 
@@ -177,37 +195,74 @@ export function ProductDetailView({
 
       {/* Main 2-Column Product Showcase */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
-        {/* Left: Sticky Multi-Image Gallery */}
-        <div className="lg:col-span-7 lg:sticky lg:top-24 space-y-4">
-          <div className="aspect-[3/4] w-full bg-[#F5F0E7] border border-[#E4DDD0] overflow-hidden">
-            <SafeImage
-              src={displayedImages[activeImageIdx]?.url || displayedImages[0]?.url || ''}
-              alt={displayedImages[activeImageIdx]?.alt_text || product.name}
-              className="w-full h-full object-cover"
-            />
+        {/* Left: Responsive product image gallery */}
+        <div className="lg:col-span-7 lg:sticky lg:top-24">
+          <div className="lg:flex lg:items-start lg:gap-3">
+            {displayedImages.length > 1 && (
+              <div className="hidden lg:flex lg:w-20 lg:shrink-0 lg:flex-col lg:gap-2 lg:max-h-[560px] lg:overflow-y-auto">
+                {displayedImages.map((img, idx) => (
+                  <button
+                    key={img.id || idx}
+                    type="button"
+                    onClick={() => setActiveImageIdx(idx)}
+                    aria-label={`View product image ${idx + 1}`}
+                    aria-current={activeImageIdx === idx ? 'true' : undefined}
+                    className={`aspect-[3/4] w-full overflow-hidden border transition-colors bg-[#F5F0E7] ${
+                      activeImageIdx === idx
+                        ? 'border-[#173D32] ring-1 ring-[#173D32]'
+                        : 'border-[#E4DDD0] opacity-75 hover:opacity-100'
+                    }`}
+                  >
+                    <SafeImage
+                      src={img.url}
+                      alt={img.alt_text || `${product.name} view ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div
+              className="relative aspect-[3/4] w-full flex-1 bg-[#F5F0E7] border border-[#E4DDD0] overflow-hidden"
+              onTouchStart={handleGalleryTouchStart}
+              onTouchEnd={handleGalleryTouchEnd}
+              aria-label="Swipe to browse product images"
+            >
+              {displayedImages[activeImageIdx] ? (
+                <SafeImage
+                  src={displayedImages[activeImageIdx].url}
+                  alt={displayedImages[activeImageIdx].alt_text || product.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center px-6 text-center text-sm text-[#5A5853]">
+                  Images for {selectedColour || 'this product'} are being updated.
+                </div>
+              )}
+            </div>
           </div>
 
           {displayedImages.length > 1 && (
-            <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
-              {displayedImages.map((img, idx) => (
-                <button
-                  key={img.id || idx}
-                  type="button"
-                  onClick={() => setActiveImageIdx(idx)}
-                  className={`aspect-[3/4] overflow-hidden border transition-colors bg-[#F5F0E7] ${
-                    activeImageIdx === idx
-                      ? 'border-[#173D32] ring-1 ring-[#173D32]'
-                      : 'border-[#E4DDD0] opacity-75 hover:opacity-100'
-                  }`}
-                >
-                  <SafeImage
-                    src={img.url}
-                    alt={img.alt_text || `${product.name} view ${idx + 1}`}
-                    className="w-full h-full object-cover"
+            <>
+              <div className="mt-3 flex items-center justify-center gap-1.5 lg:hidden" aria-label="Image pagination">
+                {displayedImages.map((img, idx) => (
+                  <button
+                    key={img.id || idx}
+                    type="button"
+                    onClick={() => setActiveImageIdx(idx)}
+                    aria-label={`Show image ${idx + 1} of ${displayedImages.length}`}
+                    aria-current={activeImageIdx === idx ? 'true' : undefined}
+                    className={`h-1.5 rounded-full transition-all ${
+                      activeImageIdx === idx ? 'w-5 bg-[#173D32]' : 'w-1.5 bg-[#D8CFC0]'
+                    }`}
                   />
-                </button>
-              ))}
-            </div>
+                ))}
+              </div>
+              <p className="mt-1 text-center text-[10px] text-[#7A756D] lg:hidden">
+                {activeImageIdx + 1} / {displayedImages.length}
+              </p>
+            </>
           )}
         </div>
 
