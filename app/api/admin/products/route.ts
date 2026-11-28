@@ -22,6 +22,7 @@ const imageSchema = z.object({
   product_id: z.string().optional(),
   url: z.string().trim().min(1),
   alt_text: z.string().trim().optional().default(''),
+  colour: z.string().trim().nullable().optional().default(null),
   display_order: z.number().int().min(1).optional().default(1),
   is_primary: z.boolean().optional().default(false),
 });
