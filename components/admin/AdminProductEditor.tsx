@@ -83,6 +83,26 @@ export function AdminProductEditor({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const moveImage = (from: number, to: number) => {
+    setImages((current) => {
+      if (to < 0 || to >= current.length || from === to) return current;
+      const next = [...current];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next.map((image, index) => ({
+        ...image,
+        display_order: index + 1,
+        is_primary: index === 0,
+      }));
+    });
+  };
+
+  const handleImageDrop = (event: React.DragEvent<HTMLDivElement>, targetIndex: number) => {
+    event.preventDefault();
+    const sourceIndex = Number(event.dataTransfer.getData('text/plain'));
+    if (Number.isInteger(sourceIndex)) moveImage(sourceIndex, targetIndex);
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -108,6 +128,7 @@ export function AdminProductEditor({
           product_id: initialProduct?.id || '',
           url: data.url,
           alt_text: name || 'Product photo',
+          colour: variants[0]?.colour || null,
           display_order: prev.length + 1,
           is_primary: prev.length === 0,
         },
@@ -359,8 +380,29 @@ export function AdminProductEditor({
 
             <div className="space-y-2">
               {images.map((img, idx) => (
-                <div key={img.id || idx} className="flex items-center gap-3 bg-white border border-[#E4DDD0] p-2.5">
+                <div
+                  key={img.id || idx}
+                  draggable
+                  onDragStart={(event) => event.dataTransfer.setData('text/plain', String(idx))}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) => handleImageDrop(event, idx)}
+                  className="flex flex-wrap items-center gap-3 bg-white border border-[#E4DDD0] p-2.5 cursor-grab"
+                >
                   <img src={img.url} alt="" className="w-12 h-14 object-cover bg-[#F5F0E7] shrink-0" />
+                  <span className="text-[10px] font-semibold text-[#173D32] w-6">#{idx + 1}</span>
+                  <select
+                    aria-label="Image colour"
+                    value={img.colour || ''}
+                    onChange={(e) => setImages((prev) => prev.map((item, i) => i === idx ? { ...item, colour: e.target.value || null } : item))}
+                    className="border border-[#D8CFC0] px-2 py-1.5 text-xs bg-white"
+                  >
+                    <option value="">All colours / default</option>
+                    {[...new Set(variants.map((variant) => variant.colour).filter(Boolean))].map((colour) => (
+                      <option key={colour} value={colour}>{colour}</option>
+                    ))}
+                  </select>
+                  <button type="button" onClick={() => moveImage(idx, idx - 1)} disabled={idx === 0} aria-label="Move image up" className="px-2 py-1 border border-[#D8CFC0] text-xs disabled:opacity-30">↑</button>
+                  <button type="button" onClick={() => moveImage(idx, idx + 1)} disabled={idx === images.length - 1} aria-label="Move image down" className="px-2 py-1 border border-[#D8CFC0] text-xs disabled:opacity-30">↓</button>
                   <input
                     type="text"
                     value={img.url}
@@ -392,6 +434,7 @@ export function AdminProductEditor({
                       product_id: initialProduct?.id || '',
                       url: '',
                       alt_text: name,
+                      colour: null,
                       display_order: prev.length + 1,
                       is_primary: false,
                     },
