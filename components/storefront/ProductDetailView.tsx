@@ -109,6 +109,11 @@ export function ProductDetailView({
     return Boolean(v && v.stock_status !== 'out_of_stock' && v.stock_quantity > 0);
   };
 
+  const colourImages = selectedColour
+    ? product.images.filter((image) => image.colour?.toLowerCase() === selectedColour.toLowerCase())
+    : [];
+  const displayedImages = selectedColour && colourImages.length > 0 ? colourImages : product.images;
+
   const maxStock = activeVariant ? Math.max(0, activeVariant.stock_quantity) : 10;
 
   const validateSelection = () => {
@@ -176,15 +181,15 @@ export function ProductDetailView({
         <div className="lg:col-span-7 lg:sticky lg:top-24 space-y-4">
           <div className="aspect-[3/4] w-full bg-[#F5F0E7] border border-[#E4DDD0] overflow-hidden">
             <SafeImage
-              src={product.images[activeImageIdx]?.url || product.images[0]?.url || ''}
-              alt={product.images[activeImageIdx]?.alt_text || product.name}
+              src={displayedImages[activeImageIdx]?.url || displayedImages[0]?.url || ''}
+              alt={displayedImages[activeImageIdx]?.alt_text || product.name}
               className="w-full h-full object-cover"
             />
           </div>
 
-          {product.images.length > 1 && (
+          {displayedImages.length > 1 && (
             <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
-              {product.images.map((img, idx) => (
+              {displayedImages.map((img, idx) => (
                 <button
                   key={img.id || idx}
                   type="button"
@@ -304,6 +309,7 @@ export function ProductDetailView({
                     type="button"
                     onClick={() => {
                       setSelectedColour(c.name);
+                      setActiveImageIdx(0);
                       setSelectionError(null);
                       setQuantity(1);
                     }}
