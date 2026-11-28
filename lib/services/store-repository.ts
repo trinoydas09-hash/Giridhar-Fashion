@@ -563,6 +563,7 @@ export async function upsertProduct(
       product_id: productId,
       url: img.url,
       alt_text: img.alt_text || input.name,
+      colour: img.colour || null,
       display_order: i + 1,
       is_primary: i === 0 ? true : img.is_primary,
     }));
