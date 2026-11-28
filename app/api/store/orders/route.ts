@@ -246,8 +246,9 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unable to prepare WhatsApp order.';
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    // Keep internal database/provider details in server logs, not public API responses.
+    console.error('[store/orders] Failed to prepare order.');
+    return NextResponse.json({ error: 'Unable to prepare your order right now. Please try again.' }, { status: 500 });
   }
 }

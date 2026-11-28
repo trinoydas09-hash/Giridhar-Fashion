@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { checkSlidingRateLimit } from '@/lib/security/rate-limit';
 import {
   claimPreviewAdmin,
   getAdminAuthModeInfo,
@@ -36,6 +37,18 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const clientIp = req.headers.get('x-real-ip')
+    || req.headers.get('x-vercel-forwarded-for')?.split(',')[0]?.trim()
+    || req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || 'unknown';
+  const limit = checkSlidingRateLimit(`admin-auth:${clientIp.slice(0, 100)}`, 5, 15 * 60_000);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many sign-in attempts. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } }
+    );
+  }
+
   try {
     const body = await req.json();
     const parsed = authActionSchema.safeParse(body);
@@ -72,8 +85,9 @@ export async function POST(req: NextRequest) {
 
     const token = issueAdminSessionToken(info.claimedEmail || email);
     return NextResponse.json({ token, email: info.claimedEmail || email }, { status: 200 });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Authentication error.';
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    // Avoid exposing internal auth/provider details to public clients.
+    console.error('[admin/auth] Authentication request failed.');
+    return NextResponse.json({ error: 'Authentication is temporarily unavailable. Please try again.' }, { status: 500 });
   }
 }
